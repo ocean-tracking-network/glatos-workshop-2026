@@ -12,26 +12,19 @@ library(utils)
 
 format <- cols( # Heres a col spec to use when reading in the files
   .default = col_character(),
-  datelastmodified = col_date(format = ""),
-  bottom_depth = col_double(),
-  receiver_depth = col_double(),
-  sensorname = col_character(),
-  sensorraw = col_character(),
-  sensorvalue = col_character(),
-  sensorunit = col_character(),
-  datecollected = col_datetime(format = ""),
-  longitude = col_double(),
-  latitude = col_double(),
-  yearcollected = col_double(),
-  monthcollected = col_double(),
-  daycollected = col_double(),
-  julianday = col_double(),
-  timeofday = col_double(),
-  datereleasedtagger = col_logical(),
-  datereleasedpublic = col_logical()
+  dateLastModified = col_date(format = "%Y-%m-%d"),
+  bottomDepth = col_double(),
+  receiverDepth = col_double(),
+  sensorName = col_character(),
+  sensorRaw = col_character(),
+  sensorValue = col_character(),
+  sensorUnit = col_character(),
+  dateCollectedUTC = col_character(), #col_datetime(format = "%Y-%m-%d %H:%M:%S"),
+  decimalLongitude = col_double(),
+  decimalLatitude = col_double()
 )
 detections <- tibble()
-for (detfile in list.files('.', full.names = TRUE, pattern = "proj.*\\.zip")) {
+for (detfile in list.files('.', full.names = TRUE, pattern = "cbcnr.*.zip")) {
   print(detfile)
   tmp_dets <- read_csv(detfile, col_types = format)
   detections <- bind_rows(detections, tmp_dets)
@@ -43,7 +36,7 @@ write_csv(detections, 'all_dets.csv', append = FALSE)
 ?read_otn_deployments
 
 # Save our detections file data into a dataframe called detections
-detections <- read_otn_detections('all_dets.csv')
+detections <- read_otn_detections('/Users/bruce/Work/otn-workshop-base/data/act/cbcnr_matched_detections_2016.csv')
 
 
 # View first 2 rows of output
@@ -110,7 +103,7 @@ sum_animal_location
 
 # Create a custom vector of Animal IDs to pass to the summary function
 # look only for these ids when doing your summary
-tagged_fish <- c('PROJ58-1218508-2015-10-13', 'PROJ58-1218510-2015-10-13')
+tagged_fish <- c('CBCNR-1218508-2015-10-13', 'CBCNR-1218511-2015-10-20')
 
 sum_animal_custom <- summarize_detections(det=detections_filtered,
                                           animals=tagged_fish,  # Supply the vector to the function
@@ -146,7 +139,7 @@ detections_w_events <- detection_events(detections_filtered,
 #Using all the events data will take too long, we will subset to just use a couple animals
 events %>% group_by(animal_id) %>% summarise(count=n()) %>% arrange(desc(count))
 
-subset_animals <- c('PROJ59-1191631-2014-07-09', 'PROJ59-1191628-2014-07-07', 'PROJ64-1218527-2016-06-07')
+subset_animals <- c('CBCNR-1218508-2015-10-13', 'CBCNR-1218511-2015-10-20')
 events_subset <- events %>% filter(animal_id %in% subset_animals)
 
 events_subset
@@ -177,7 +170,7 @@ abacus_plot(detections_w_events,
             main='ACT Detections by Station') # can use plot() variables here, they get passed thru to plot()
 
 # pick a single fish to plot
-abacus_plot(detections_filtered[detections_filtered$animal_id== "PROJ58-1218508-2015-10-13",],
+abacus_plot(detections_filtered[detections_filtered$animal_id== "CBCNR-1218508-2015-10-13",],
             location_col='station',
             main="PROJ58-1218508-2015-10-13 Detections By Station")
 
@@ -188,8 +181,8 @@ detections_filtered
 ?detection_bubble_plot
 
 # We'll use raster to get a polygon to plot against
-library(raster)
-USA <- getData('GADM', country="USA", level=1)
+library(geodata)
+USA <- geodata::gadm("USA", level=1, path=".")
 MD <- USA[USA$NAME_1=="Maryland",]
 
 bubble_station <- detection_bubble_plot(detections_filtered,
