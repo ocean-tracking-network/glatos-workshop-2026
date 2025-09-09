@@ -33,18 +33,6 @@ for (detfile in list.files('.', full.names = TRUE, pattern = "gmr_matched.*\\.cs
 }
 write_csv(detections, 'all_dets.csv', append = FALSE)
 
-value = lubridate::fast_strptime(
-  tmp_dets$dateCollectedUTC,
-  format = "%Y-%m-%dT%H:%M:%SZ",
-  tz = "UTC",
-  lt = FALSE
-)
-
-value = lubridate::parse_date_time(
-  tmp_dets$dateCollectedUTC,
-  orders = c("%Y-%m-%d %H:%M:%S")
-)
-
 ## glatos help files are helpful!!
 ?read_otn_deployments
 
@@ -92,7 +80,7 @@ head(sum_location)
 # For example we will create a uniq_station column for if you have duplicate station names across projects
 
 detections_filtered_special <- detections_filtered %>%
-  mutate(station_uniq = paste(glatos_receiver_project, station, sep=':'))
+  mutate(station_uniq = paste(detectedBy, station, sep=':'))
 
 
 sum_location_special <- summarize_detections(detections_filtered_special, location_col = 'station_uniq', summ_type='location')
@@ -194,8 +182,8 @@ detections_filtered
 ?detection_bubble_plot
 
 # We'll use raster to get a polygon to plot against
-library(raster)
-ECU <- getData('GADM', country="Ecuador", level=1)
+library(geodata)
+ECU <- geodata::gadm("Ecuador", level=1, path=".")
 GAL <- ECU[ECU$NAME_1=="Galápagos",]
 
 bubble_station <- detection_bubble_plot(detections_filtered,
