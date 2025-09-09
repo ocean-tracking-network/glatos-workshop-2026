@@ -6,11 +6,12 @@ library(pathroutr)
 library(ggspatial)
 library(sp)
 library(raster)
+library(geodata)
 
 setwd("YOUR/PATH/TO/data/act")
 
 detection_events <- #create detections event variable
-  read_otn_detections('proj58_matched_detections_2016.csv') %>% # reading detections
+  read_otn_detec tions('cbcnr_matched_detections_2016.csv') %>% # reading detections
   false_detections(tf = 3600) %>%  #find false detections
   filter(passed_filter != FALSE) %>% 
   detection_events(location_col = 'station', time_sep=3600)
@@ -18,14 +19,14 @@ detection_events <- #create detections event variable
 plot_data <- detection_events %>% 
   dplyr::select(animal_id, mean_longitude,mean_latitude, first_detection)
 
-one_fish <- plot_data[plot_data$animal_id == "PROJ58-1218518-2015-09-16",]
+one_fish <- plot_data[plot_data$animal_id == "CBCNR-1218518-2015-09-16",]
 
 one_fish <- one_fish %>% filter(mean_latitude < 38.90 & mean_latitude > 38.87) %>% 
   slice(155:160)
 
-USA<-getData('GADM', country='USA', level=1)
 
-shape_file <- USA[USA$NAME_1 == 'Maryland',]
+USA <- geodata::gadm("USA", level=1, path=".")
+shape_file <- USA[USA$NAME_1=="Maryland",]
 
 md_polygon <- st_as_sf(shape_file)  %>% st_transform(5070)
 
