@@ -2,6 +2,8 @@
 
 ## Set your working directory
 
+remotes::install_github('ocean-tracking-network/glatos', ref='otn-parquet', force=TRUE)
+
 setwd("YOUR/PATH/TO/data/migramar")
 library(glatos)
 library(tidyverse)
@@ -12,23 +14,16 @@ library(utils)
 
 format <- cols( # Heres a col spec to use when reading in the files
   .default = col_character(),
-  datelastmodified = col_date(format = ""),
-  bottom_depth = col_double(),
-  receiver_depth = col_double(),
-  sensorname = col_character(),
-  sensorraw = col_character(),
-  sensorvalue = col_character(),
-  sensorunit = col_character(),
-  datecollected = col_datetime(format = ""),
-  longitude = col_double(),
-  latitude = col_double(),
-  yearcollected = col_double(),
-  monthcollected = col_double(),
-  daycollected = col_double(),
-  julianday = col_double(),
-  timeofday = col_double(),
-  datereleasedtagger = col_logical(),
-  datereleasedpublic = col_logical()
+  dateLastModified = col_date(format = "%Y-%m-%d"),
+  bottomDepth = col_double(),
+  receiverDepth = col_double(),
+  sensorName = col_character(),
+  sensorRaw = col_character(),
+  sensorValue = col_character(),
+  sensorUnit = col_character(),
+  dateCollectedUTC = col_character(), #col_datetime(format = "%Y-%m-%d"),
+  decimalLongitude = col_double(),
+  decimalLatitude = col_double()
 )
 detections <- tibble()
 for (detfile in list.files('.', full.names = TRUE, pattern = "gmr_matched.*\\.csv")) {
@@ -38,12 +33,11 @@ for (detfile in list.files('.', full.names = TRUE, pattern = "gmr_matched.*\\.cs
 }
 write_csv(detections, 'all_dets.csv', append = FALSE)
 
-
 ## glatos help files are helpful!!
 ?read_otn_deployments
 
 # Save our detections file data into a dataframe called detections
-detections <- read_otn_detections('all_dets.csv')
+detections <- read_otn_detections('all_dets.csv', format="new")
 
 
 # View first 2 rows of output
@@ -86,7 +80,7 @@ head(sum_location)
 # For example we will create a uniq_station column for if you have duplicate station names across projects
 
 detections_filtered_special <- detections_filtered %>%
-  mutate(station_uniq = paste(glatos_receiver_project, station, sep=':'))
+  mutate(station_uniq = paste(detectedBy, station, sep=':'))
 
 
 sum_location_special <- summarize_detections(detections_filtered_special, location_col = 'station_uniq', summ_type='location')
@@ -188,8 +182,8 @@ detections_filtered
 ?detection_bubble_plot
 
 # We'll use raster to get a polygon to plot against
-library(raster)
-ECU <- getData('GADM', country="Ecuador", level=1)
+library(geodata)
+ECU <- geodata::gadm("Ecuador", level=1, path=".")
 GAL <- ECU[ECU$NAME_1=="Galápagos",]
 
 bubble_station <- detection_bubble_plot(detections_filtered,

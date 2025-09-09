@@ -12,24 +12,18 @@ library(utils)
 
 format <- cols( # Heres a col spec to use when reading in the files
   .default = col_character(),
-  datelastmodified = col_date(format = ""),
-  bottom_depth = col_double(),
-  receiver_depth = col_double(),
-  sensorname = col_character(),
-  sensorraw = col_character(),
-  sensorvalue = col_character(),
-  sensorunit = col_character(),
-  datecollected = col_datetime(format = ""),
-  longitude = col_double(),
-  latitude = col_double(),
-  yearcollected = col_double(),
-  monthcollected = col_double(),
-  daycollected = col_double(),
-  julianday = col_double(),
-  timeofday = col_double(),
-  datereleasedtagger = col_logical(),
-  datereleasedpublic = col_logical()
+  dateLastModified = col_date(format = "%Y-%m-%d"),
+  bottomDepth = col_double(),
+  receiverDepth = col_double(),
+  sensorName = col_character(),
+  sensorRaw = col_character(),
+  sensorValue = col_character(),
+  sensorUnit = col_character(),
+  dateCollectedUTC = col_character(), #col_datetime(format = "%Y-%m-%d %H:%M:%S"),
+  decimalLongitude = col_double(),
+  decimalLatitude = col_double()
 )
+
 detections <- tibble()
 for (detfile in list.files('.', full.names = TRUE, pattern = "tqcs.*\\.zip")) {
   print(detfile)
@@ -88,7 +82,7 @@ head(sum_location)
 # For example we will create a uniq_station column for if you have duplicate station names across projects
 
 detections_filtered_special <- detections_filtered %>%
-  mutate(station_uniq = paste(glatos_receiver_project, station, sep=':'))
+  mutate(station_uniq = paste(detectedBy, station, sep=':'))
 
 
 sum_location_special <- summarize_detections(detections_filtered_special, location_col = 'station_uniq', summ_type='location')
@@ -112,7 +106,7 @@ sum_animal_location
 
 # Create a custom vector of Animal IDs to pass to the summary function
 # look only for these ids when doing your summary
-tagged_fish <- c('TQCS-1049258-2008-02-14', '	TQCS-1049269-2008-02-28')
+tagged_fish <- c('TQCS-1049258-2008-02-14', 'TQCS-1049269-2008-02-28')
 
 sum_animal_custom <- summarize_detections(det=detections_filtered,
                                           animals=tagged_fish,  # Supply the vector to the function
@@ -189,8 +183,8 @@ detections_filtered
 ?detection_bubble_plot
 
 # We'll use raster to get a polygon to plot on
-library(raster)
-USA <- getData('GADM', country="USA", level=1)
+library(geodata)
+USA <- geodata::gadm("USA", level=1, path=".")
 FL <- USA[USA$NAME_1=="Florida",]
 
 #Alternative method of getting the polygon. 
