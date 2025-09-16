@@ -11,7 +11,7 @@ objectives:
 - "Filter OBIS by OTN node, dataset, taxon, region, and time."
 - "Load OTN records into R or Python and make a quick map."
 keypoints:
-- "OBIS hosts species occurrence records (not infrastructure layers)."
+- "OBIS hosts species occurrence records."
 - "OTN is an OBIS node; UUID: 68f83ea7-69a7-44fd-be77-3c3afd6f3cf8."
 - "Use robis (R) or pyobis (Python) for programmatic queries."
 - "Keep queries lean with fields, geometry, time window, and paging."
@@ -263,67 +263,6 @@ plt.xlabel("Year"); plt.ylabel("Records"); plt.show()
 df["eventDate"].dt.month.value_counts().sort_index().plot(kind="bar", title="Records by month")
 plt.xlabel("Month"); plt.ylabel("Records"); plt.show()
 ```
-
-## Quick-Start: Atlantic Salmon in Atlantic Canada
-
-Now let’s see a **lighter example**: just 4 steps for **Atlantic salmon (*Salmo salar*)**.
-
-### 1) Setup
-
-Use the OTN node, species name, and a bounding box around the Gulf of St. Lawrence.
-
-```python
-from pyobis import occurrences
-import pandas as pd
-import folium
-from folium.plugins import HeatMap
-import matplotlib.pyplot as plt
-
-OTN = "68f83ea7-69a7-44fd-be77-3c3afd6f3cf8"
-SPECIES = "Salmo salar"
-WKT = "POLYGON((-70 40, -70 50, -55 50, -55 40, -70 40))"
-```
-
-### 2) Fetch & clean
-
-Get occurrence records, parse dates, and drop missing coordinates.
-
-```python
-df = occurrences.search(
-    scientificname=SPECIES,
-    nodeid=OTN,
-    geometry=WKT,
-    startdate="2005-01-01",
-    size=2000,
-    fields="scientificName,eventDate,decimalLatitude,decimalLongitude,datasetName"
-).execute()
-
-df = df.dropna(subset=["decimalLatitude","decimalLongitude"]).copy()
-df["eventDate"] = pd.to_datetime(df["eventDate"], errors="coerce")
-```
-
-### 3) Map
-
-Plot a heatmap plus a few sample points.
-
-```python
-m = folium.Map([df["decimalLatitude"].median(), df["decimalLongitude"].median()], zoom_start=5)
-HeatMap(df[["decimalLatitude","decimalLongitude"]].values.tolist(),
-        radius=14, blur=22, min_opacity=0.25).add_to(m)
-
-m.save("otn_salmon_map.html")
-print("Saved → otn_salmon_map.html")
-```
-
-### 4) Simple trend
-
-Count records per year.
-
-```python
-df["eventDate"].dt.year.value_counts().sort_index().plot(kind="bar", title="Salmon records per year")
-plt.xlabel("Year"); plt.ylabel("Records"); plt.show()
-```
-
 ---
 
 ## Common pitfalls & quick fixes
