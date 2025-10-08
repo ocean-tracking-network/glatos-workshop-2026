@@ -17,8 +17,12 @@ To install the appropriate branch, run the following code:
 install.packages('devtools')
 library(devtools)
 
-devtools::install_github('ocean-tracking-network/remora@nicerHulls', force=TRUE)
+devtools::install_github("ocean-tracking-network/surimi", force=TRUE)
+
+devtools::install_github("ocean-tracking-network/remora", force=TRUE)
+
 library(remora)
+library(surimi)
 ~~~
 {: .language-r}
 

@@ -57,7 +57,7 @@ The first big difference between our basic animation lesson and this lesson is t
 This is only one way to get a shapefile for our coastlines- you may find you prefer a different method. Regardless, this is the one we'll use for now. 
 
 ~~~
-CAN<-gadm('CANADA', level=1, path="./geodata", resolution=2)
+CAN<-geodata::gadm('CANADA', level=1, path=".")
 ~~~
 {: .language-r}
 
@@ -193,7 +193,7 @@ library(raster)
 library(geodata)
 
 detection_events <- #create detections event variable
-  read_otn_detections('proj58_matched_detections_2016.csv') %>% # reading detections
+  read_otn_detections('cbcnr_matched_detections_2016.csv') %>% # reading detections
   false_detections(tf = 3600) %>%  #find false detections
   filter(passed_filter != FALSE) %>% 
   detection_events(location_col = 'station', time_sep=3600)
@@ -201,7 +201,7 @@ detection_events <- #create detections event variable
 plot_data <- detection_events %>% 
   dplyr::select(animal_id, mean_longitude,mean_latitude, first_detection)
 
-one_fish <- plot_data[plot_data$animal_id == "PROJ58-1218518-2015-09-16",]
+one_fish <- plot_data[plot_data$animal_id == "CBCNR-1218518-2015-09-16",]
 
 one_fish <- one_fish %>% filter(mean_latitude < 38.90 & mean_latitude > 38.87) %>% 
   slice(155:160)
@@ -216,7 +216,7 @@ The first big difference between our basic animation lesson and this lesson is t
 This is only one way to get a shapefile for our coastlines- you may find you prefer a different method. Regardless, this is the one we'll use for now. 
 
 ~~~
-USA<-gadm('USA', level=1, path="./geodata", resolution=2)
+USA<-geodata::gadm("USA", level=1, path=".")
 ~~~
 {: .language-r}
 

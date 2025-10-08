@@ -161,7 +161,7 @@ Finally, we use the `detection_events` function with station as the `location_co
 
 ~~~
 detection_events <- #create detections event variable
-  read_otn_detections('proj58_matched_detections_2016.csv') %>% # reading detections
+  read_otn_detections('cbcnr_matched_detections_2016.csv') %>% # reading detections
   false_detections(tf = 3600) %>%  #find false detections
   filter(passed_filter != FALSE) %>% 
   detection_events(location_col = 'station', time_sep=3600)
@@ -179,7 +179,7 @@ plot_data <- detection_events %>%
 Additionally, animating many animal tracks can be computationally intensive as well as create a potentially confusing plot, so for this lesson we will only be plotting one fish. We well subset our data by filtering where the `animal_id` is equal to `PROJ58-1218508-2015-10-13`.
 
 ~~~
-one_fish <- plot_data[plot_data$animal_id == "PROJ58-1218508-2015-10-13",] 
+one_fish <- plot_data[plot_data$animal_id == "CBCNR-1218508-2015-10-13",] 
 ~~~
 {: .language-r}
 
