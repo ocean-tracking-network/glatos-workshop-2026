@@ -30,9 +30,9 @@ This is good, but you can see that the plot is cluttered. Rather than plotting o
 
 ~~~
 # pick a single fish to plot
-abacus_plot(detections_filtered[detections_filtered$animal_id== "PROJ58-1218508-2015-10-13",],
+abacus_plot(detections_filtered[detections_filtered$animal_id== "CBCNR-1218508-2015-10-13",],
             location_col='station',
-            main="PROJ58-1218508-2015-10-13 Detections By Station")
+            main="CBCNR-1218508-2015-10-13 Detections By Station")
 ~~~
 {: .language-r}
 
@@ -46,8 +46,9 @@ detections_filtered
 ?detection_bubble_plot
 
 # We'll use raster to get a polygon to plot against
-library(raster)
-USA <- getData('GADM', country="USA", level=1)
+library(geodata)
+
+USA <- geodata::gadm("USA", level=1, path=".")
 MD <- USA[USA$NAME_1=="Maryland",]
 
 bubble_station <- detection_bubble_plot(detections_filtered,
@@ -144,8 +145,8 @@ detections_filtered
 ?detection_bubble_plot
 
 # We'll use raster to get a polygon to plot on
-library(raster)
-USA <- getData('GADM', country="USA", level=1)
+library(geodata)
+USA <- geodata::gadm("USA", level=1, path=".")
 FL <- USA[USA$NAME_1=="Florida",]
 
 #Alternative method of getting the polygon. 
@@ -322,7 +323,8 @@ detections_filtered
 
 # We'll use raster to get a polygon to plot against
 library(raster)
-ECU <- getData('GADM', country="Ecuador", level=1)
+library(geodata)
+ECU <- geodata::gadm("Ecuador", level=1, path=".")
 GAL <- ECU[ECU$NAME_1=="Galápagos",]
 
 bubble_station <- detection_bubble_plot(detections_filtered,
