@@ -365,6 +365,65 @@ Here are a few useful extras:
 These options make requests faster, lighter, and more reproducible.
 
 ---
+## Assessment
+
+> ## Check your understanding
+> You’ve been asked to map receiver stations for a regional study area between longitudes −70 and −40 and latitudes 40 to 60.  
+> Which of the following WFS URLs would return the right subset **as CSV**?
+>
+> 1. `...?service=WFS&request=GetFeature&typeName=otn:stations_receivers&bbox=40,-70,60,-40&outputFormat=csv`  
+> 2. `...?service=WFS&request=GetFeature&typeName=otn:stations_receivers&bbox=-70,40,-40,60,EPSG:4326&outputFormat=csv`  
+> 3. `...?service=WMS&layers=otn:stations_receivers&bbox=-70,40,-40,60&format=image/png`
+>
+> > ## Solution
+> > **Option 2.**  
+> > It uses the correct coordinate order (minLon,minLat,maxLon,maxLat), includes the CRS, and requests `WFS` data as CSV.  
+> > Option 1 swaps lat/lon; Option 3 is WMS, which only returns an image.
+> {: .solution}
+{: .challenge}
+
+---
+
+> ## Spot the issue
+> A user reports that this request only returns 50 features, even though the dataset is much larger:  
+>
+> ```
+> https://members.oceantrack.org/geoserver/otn/ows?service=WFS&version=1.0.0&
+> request=GetFeature&typeName=otn:stations_receivers&outputFormat=csv
+> ```
+>
+> What could you add to return more data?
+>
+> > ## Solution
+> > Add a **limit parameter**, e.g. `&maxFeatures=50000`.  
+> > GeoServer defaults to 50 results per query unless you raise that limit.
+> {: .solution}
+{: .challenge}
+
+---
+
+> ## Construct a filtered query
+> You only want receivers from the `MAST` project in your region of interest.  
+> Write the filter part of a WFS request that would do this.
+>
+> > ## Solution
+> > Use a CQL filter:  
+> > `&cql_filter=collectioncode='MAST'&bbox=-70,40,-40,60,EPSG:4326`  
+> > You can combine multiple filters using `AND` or `OR` if needed.
+> {: .solution}
+{: .challenge}
+
+---
+
+> ## Short answer
+> Why might someone prefer `outputFormat=application/json` over `outputFormat=csv`?
+>
+> > ## Solution
+> > JSON (or GeoJSON) keeps geometry in a structured spatial format that GIS software and libraries like `leaflet`, `folium`, and `geopandas` can read directly for mapping, while CSV flattens coordinates into columns.
+> {: .solution}
+{: .challenge}
+
+---
 
 ### Exercise
 
