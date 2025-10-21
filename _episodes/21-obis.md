@@ -19,50 +19,69 @@ keypoints:
 
 ## What is OBIS and how does OTN fit in?
 
-- **OBIS (Ocean Biodiversity Information System)** is the global hub for **marine species occurrence** data.
-- The **Ocean Tracking Network (OTN)** is one of OBIS’s **regional nodes**.  
-  OTN contributes **tagging and tracking metadata** summarized as *occurrence records* (e.g., tag releases, detection events).
-- To focus only on OTN-contributed data, use the **OTN node UUID**:
+* OBIS (Ocean Biodiversity Information System) is the global hub for marine species
+  occurrence data.
+* The Ocean Tracking Network (OTN) is one of OBIS’s regional nodes.
+  OTN contributes tagging and tracking metadata summarized as occurrence records
+  (for example, tag releases and detection events).
+* To focus only on OTN-contributed data, use the OTN node UUID:
 
-```
-
+~~~
 68f83ea7-69a7-44fd-be77-3c3afd6f3cf8
+~~~
+{: .language-text}
 
-```
----
+## Bulk or offline access (optional)
+
+While this lesson focuses on using the **OBIS API** and the `robis` / `pyobis` packages for
+programmatic queries, OBIS also provides complete data exports for large-scale or offline use.
+
+* OBIS publishes its full occurrence data archive on the
+  **AWS Open Data Registry**:
+  [https://registry.opendata.aws/obis/](https://registry.opendata.aws/obis/)
+* Technical details and examples are maintained in the
+  **OBIS Open Data GitHub repository**:
+  [https://github.com/iobis/obis-open-data](https://github.com/iobis/obis-open-data)
+
+> These exports contain the same occurrence records available through the API,
+> formatted as CSV and GeoParquet files for analysis in cloud or high-performance environments.
+> For most OTN-focused analyses, the API-based approach taught here is sufficient,
+> but bulk exports are ideal if you need **full OBIS datasets** or **offline workflows**.
 
 ## Anatomy of an OBIS query (OTN-focused)
 
-An OBIS request is just a URL with filters.  
-Here’s a simple example, limited to **blue sharks** contributed by **OTN**:
+An OBIS request is a URL with filters.
+The example below retrieves blue shark records contributed by OTN.
 
-```text
+~~~
 https://api.obis.org/v3/occurrence?
 nodeid=68f83ea7-69a7-44fd-be77-3c3afd6f3cf8&
 scientificname=Prionace%20glauca&
 startdate=2000-01-01&
 size=100
-````
+~~~
+
+{: .language-text}
 
 ### What each part means
 
-> **nodeid** — restrict to the OTN node  
-> **scientificname** — filter by species (e.g., *Prionace glauca*)  
-> **startdate / enddate** — filter by time window  
-> **geometry** — filter by region (polygon or bounding box in WKT)  
-> **datasetid** — limit to one OTN dataset  
-> **size / from** — control paging through large results  
-> **fields** — choose only the columns you need (faster, smaller)
+> **nodeid** — restricts results to the OTN node
+> **scientificname** — filters by species (for example, *Prionace glauca*)
+> **startdate / enddate** — sets a time window
+> **geometry** — filters by region (polygon or bounding box in WKT)
+> **datasetid** — limits the search to a specific OTN dataset
+> **size / from** — controls paging through large results
+> **fields** — specifies which columns to return for smaller, faster responses
 
-## Minimal recipes: your first OBIS query
+## Your first OBIS query
 
-The smallest working recipe is just: **species + OTN node**.
-Here’s an example pulling **blue shark (*Prionace glauca*)** records contributed by OTN.
+The simplest OBIS query includes only two filters: a species name and the OTN node UUID.
+The example below retrieves blue shark (*Prionace glauca*) records contributed by OTN.
 
-### R (robis)
+### R (using robis)
 
-```r
-# install.packages("robis")   # once
+~~~
+# install.packages("robis")   # run once
 library(robis)
 
 OTN <- "68f83ea7-69a7-44fd-be77-3c3afd6f3cf8"
@@ -70,12 +89,13 @@ OTN <- "68f83ea7-69a7-44fd-be77-3c3afd6f3cf8"
 blue <- occurrence("Prionace glauca", nodeid = OTN, size = 500)
 
 head(blue)
-```
+~~~
+{: .language-r}
 
-### Python (pyobis)
+### Python (using pyobis)
 
-```python
-# pip install pyobis pandas   # once
+~~~
+# pip install pyobis pandas   # run once
 from pyobis import occurrences
 
 OTN = "68f83ea7-69a7-44fd-be77-3c3afd6f3cf8"
@@ -87,21 +107,22 @@ blue = occurrences.search(
 ).execute()
 
 print(blue.head())
-```
+~~~
+{: .language-python}
 
 ## Adding filters
 
-Just like with WFS, you can **add filters** to make queries more precise.
-The most useful are:
+You can add filters to make OBIS queries more specific.
+The most common options are:
 
 * **Time window** (`startdate`, `enddate`)
-* **Place** (`geometry=` WKT polygon or bbox in lon/lat)
+* **Place** (`geometry=` using a WKT polygon or bounding box in longitude/latitude)
 * **Dataset** (`datasetid=`)
-* **Fields** (`fields=` → return only the columns you need)
+* **Fields** (`fields=` to return only selected columns)
 
 ### R
 
-```r
+~~~
 # Time filter (since 2000)
 blue_time <- occurrence("Prionace glauca", nodeid = OTN, startdate = "2000-01-01")
 
@@ -112,14 +133,16 @@ blue_space <- occurrence("Prionace glauca", nodeid = OTN, geometry = wkt)
 # Dataset filter (replace with an actual dataset UUID)
 # blue_ds <- occurrence("Prionace glauca", nodeid = OTN, datasetid = "DATASET-UUID")
 
-# Slim down fields
+# Return selected fields only
 blue_lean <- occurrence("Prionace glauca", nodeid = OTN,
-  fields = c("scientificName","eventDate","decimalLatitude","decimalLongitude","datasetName"))
-```
+  fields = c("scientificName", "eventDate", "decimalLatitude",
+             "decimalLongitude", "datasetName"))
+~~~
+{: .language-r}
 
 ### Python
 
-```python
+~~~
 # Time filter (since 2000)
 blue_time = occurrences.search(
     scientificname="Prionace glauca", nodeid=OTN, startdate="2000-01-01"
@@ -136,12 +159,13 @@ blue_space = occurrences.search(
 #     scientificname="Prionace glauca", nodeid=OTN, datasetid="DATASET-UUID"
 # ).execute()
 
-# Slim down fields
+# Return selected fields only
 blue_lean = occurrences.search(
     scientificname="Prionace glauca", nodeid=OTN,
     fields="scientificName,eventDate,decimalLatitude,decimalLongitude,datasetName"
 ).execute()
-```
+~~~
+{: .language-python}
 
 **Tips**
 

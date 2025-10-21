@@ -17,85 +17,74 @@ keypoints:
 - "You can load ERDDAP results directly into R or Python using CSV or JSON."  
 - "Start small, then build up filters for time, space, and attributes."
 ---
-
 ## What is ERDDAP?
 
-**ERDDAP** (Environmental Research Division’s Data Access Program) is an **open-source data server** that provides a consistent, flexible way to **search, subset, and download scientific data**, especially time-series and tabular data from many sources using simple web URLs.
+ERDDAP (Environmental Research Division’s Data Access Program) is an open-source data server that provides a consistent and flexible way to search, subset, and download scientific data, particularly time-series and tabular datasets. It functions as both a database and a web API, allowing users to define variables, filters, and output formats in their data requests. ERDDAP then delivers the requested data in formats such as CSV, JSON, or NetCDF, which can be directly integrated into analytical tools like R or Python.
 
-It acts as both a **database and a web API**: you describe what data you want by specifying variables, filters, and an output format, and ERDDAP returns a ready-to-use file (like CSV, JSON, or NetCDF) that can be loaded directly into R, Python, or other analysis tools.
+Within the Ocean Tracking Network (OTN), ERDDAP is used to publish public time-series and detection datasets, including acoustic animal detections, glider mission data (e.g., temperature and salinity), and mooring or sensor-based time-series. Each dataset has a unique dataset ID (for example, `otn_aat_detections`) and a list of variables such as `time`, `latitude`, `longitude`, `depth`, or `transmitter_id`.
 
-### How OTN uses it
-
-OTN publishes its **public time-series and detection data** through ERDDAP.
-That includes things like:
-
-* detections of acoustically tagged animals
-* glider mission measurements (temperature, salinity, etc.)
-* mooring or sensor time-series
-
-Each dataset in ERDDAP has a unique **dataset ID** (e.g. `otn_aat_detections`) and a list of **variables** (columns) such as `time`, `latitude`, `longitude`, `depth`, or `transmitter_id`.
-
-Researchers can use ERDDAP to:
-
-* pull only the **columns** they need (no giant downloads)
-* limit results by **time** or **location**
-* choose an **output format** (CSV, JSON, NetCDF)
-* integrate those results directly into analysis workflows
-
-In short: ERDDAP is OTN’s **data engine** — it tells you *what happened, where, and when*.
+Researchers can use ERDDAP to select specific variables, filter data by time or location, specify the desired output format, and integrate the retrieved data into analytical workflows. ERDDAP serves as OTN’s central data access platform, providing clear and efficient access to information about what happened, where, and when.
 
 ## Anatomy of an ERDDAP TableDAP Request
 
-ERDDAP provides **table-based access** to OTN data through a simple, reproducible URL pattern.
-Each request is a **complete recipe** for what data you want, how it should be filtered, and what format it should come back in.
+ERDDAP provides table-based access to OTN data through a simple, reproducible URL pattern.
 
-### The basic structure
+### Basic structure
 
 ```text
 https://members.oceantrack.org/erddap/tabledap/<dataset_id>.<file_type>?<variables>[&<filters>]
 ```
 
-An ERDDAP URL is made up of four parts:
+{: .language-text}
 
-| Component         | Description                                 | Example                                                                          |
-| ----------------- | ------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Base endpoint** | Always starts with `/erddap/tabledap/`      | `https://members.oceantrack.org/erddap/tabledap/`                                |
-| **Dataset ID**    | The specific dataset to query               | `otn_aat_detections`                                                             |
-| **File type**     | The output format you want                  | `.csv`, `.json`, `.nc`                                                           |
-| **Query**         | Variables and filters joined by `?` and `&` | `?time,latitude,longitude&time>=2016-11-01T00:00:00Z&time<=2016-11-16T23:59:59Z` |
+An ERDDAP URL consists of four components:
 
-Putting it all together:
+| Component     | Description                                 | Example                                                                          |
+| ------------- | ------------------------------------------- | -------------------------------------------------------------------------------- |
+| Base endpoint | Always begins with `/erddap/tabledap/`      | `https://members.oceantrack.org/erddap/tabledap/`                                |
+| Dataset ID    | The specific dataset to query               | `otn_aat_detections`                                                             |
+| File type     | Desired output format                       | `.csv`, `.json`, `.nc`                                                           |
+| Query         | Variables and filters joined by `?` and `&` | `?time,latitude,longitude&time>=2016-11-01T00:00:00Z&time<=2016-11-16T23:59:59Z` |
+
+Example request:
 
 ```text
 https://members.oceantrack.org/erddap/tabledap/otn_aat_detections.csv?time,latitude,longitude&time>=2016-11-01T00:00:00Z&time<=2016-11-16T23:59:59Z
 ```
 
-This request asks ERDDAP to:
+{: .language-text}
 
-* use the **`otn_aat_detections`** dataset
-* return results in **CSV** format
-* include only the columns `time`, `latitude`, and `longitude`
-* limit rows to detections between **1–16 November 2016**
+This query instructs ERDDAP to:
 
-### Choosing Variables, Filters, and Formats
+* Use the `otn_aat_detections` dataset
+* Return results in CSV format
+* Include only the columns `time`, `latitude`, and `longitude`
+* Restrict rows to detections between 1–16 November 2016
 
-Every ERDDAP dataset comes with its own list of variables and supported filters, all visible directly in the web interface. You can select only the variables you need, then apply constraints, such as time ranges, latitude and longitude bounds, or numeric thresholds, to limit what the server returns. All of these filters are applied on the server side, meaning you only download the exact subset you request.
+### Choosing variables, filters, and formats
 
-You can also choose from multiple output formats, depending on your workflow. Most users start with `.csv` for use in R or Python, but ERDDAP also supports JSON, NetCDF (`.nc`), and newer formats like Parquet for large or cloud-based analyses. The full list of options appears at the bottom of the Data Access Form.
+Each ERDDAP dataset lists its available variables and supported filters in the web interface.
+Users can select only the variables required and apply constraints such as time ranges, spatial
+bounds, or numeric thresholds to limit the results. These filters are applied server-side,
+ensuring only the requested subset is downloaded.
 
-### Try it yourself
+Multiple output formats are supported. CSV is commonly used for R or Python workflows,
+but JSON, NetCDF (`.nc`), and Parquet are also available for large-scale or cloud-based analyses.
+The full list of output options appears at the bottom of the Data Access Form.
 
-You can open a live query in your browser right now:
+### Example query
 
-🔗 [https://members.oceantrack.org/erddap/tabledap/otn_aat_detections.csv?time,latitude,longitude&time>=2016-11-01T00:00:00Z&time<=2016-11-16T23:59:59Z](https://members.oceantrack.org/erddap/tabledap/otn_aat_detections.csv?time,latitude,longitude&time>=2016-11-01T00:00:00Z&time<=2016-11-16T23:59:59Z)
+A live query can be opened directly in a browser:
 
-You can change `.csv` → `.json` or adjust the dates to explore how the system responds.
+[https://members.oceantrack.org/erddap/tabledap/otn_aat_detections.csv?time,latitude,longitude&time>=2016-11-01T00:00:00Z&time<=2016-11-16T23:59:59Z](https://members.oceantrack.org/erddap/tabledap/otn_aat_detections.csv?time,latitude,longitude&time>=2016-11-01T00:00:00Z&time<=2016-11-16T23:59:59Z)
+
+Users can modify `.csv` to `.json` or adjust the time range to explore different results.
 
 ## Accessing OTN ERDDAP Data in R and Python
 
-### Example: Reading from ERDDAP in R
+### Reading ERDDAP data in R
 
-```r
+~~~
 # If needed, install:
 # install.packages("readr")
 
@@ -109,17 +98,20 @@ detections <- read_csv(erddap_url, show_col_types = FALSE)
 
 # Preview the first few rows
 head(detections)
-```
+~~~
+{: .language-r}
 
-**What happens here:**
+**Explanation**
 
 * `read_csv()` downloads the filtered dataset directly from ERDDAP.
-* The server only returns the columns and date range specified in the URL.
-* The result is ready for immediate use — you can summarize, plot, or join it with other data.
+* The server returns only the specified columns and time range.
+* The resulting data frame can be used immediately for analysis or visualization.
 
-### Example: Reading from ERDDAP in Python
+---
 
-```python
+### Reading ERDDAP data in Python
+
+~~~
 # If needed, install:
 # pip install pandas
 
@@ -138,91 +130,131 @@ detections = pd.read_csv(erddap_url)
 
 # Preview the first few rows
 print(detections.head())
-```
+~~~
+{: .language-python}
 
-**What happens here:**
+**Explanation**
 
-* `pd.read_csv()` fetches the CSV directly from ERDDAP.
-* Filtering, variable selection, and formatting all happened server-side.
-* You can now analyze or visualize this subset locally.
+* `pd.read_csv()` retrieves the filtered CSV directly from ERDDAP.
+* Variable selection, filtering, and formatting occur on the server side.
+* The resulting DataFrame is immediately ready for exploration or analysis.
 
 ## Exploring ERDDAP’s Built-in Tools
 
-Beyond being a data API, **ERDDAP provides a complete browser interface** for exploring, filtering, plotting, and exporting datasets.
-Each dataset page includes a set of built-in utilities designed for quick data access, discovery, and testing.
+ERDDAP is not only a data API but also a complete browser-based interface
+for exploring, filtering, plotting, and exporting datasets.
+Each dataset page includes a set of built-in tools designed for
+data access, discovery, and quick validation.
 
-**Exploring the ERDDAP Dataset Catalog**
+### The ERDDAP Dataset Catalog
 
-When you first open the Ocean Tracking Network’s ERDDAP server, this is the page you’ll see.
-It’s a catalog, a complete list of every dataset that the system makes publicly available.
-Think of it as the **front door** to OTN’s data services.
+When you open the Ocean Tracking Network’s ERDDAP server,
+the first page you see is the dataset catalog.
+This catalog lists every dataset that is publicly available through the system.
 
 <p align="center">
   <img src="../fig/erddap_catalog.png" alt="ERDDAP main dataset catalog showing dataset titles, links, and dataset IDs" width="85%">
 </p>
 
-Each row in this table represents a single dataset. Some are small (for example, metadata tables or summaries), while others, like **animal detections** or **glider missions**, contain millions of records collected across years of field work.
+Each row in this table represents a dataset.
+Some are small, such as metadata summaries, while others—like
+animal detections or glider missions—contain millions of records collected
+over many years of fieldwork.
 
-If you look closely, every dataset row is packed with small links, each one opens a different way of exploring the same data.
+Each dataset row includes several links that provide different ways to explore the same data.
 
-The link under **“TableDAP”** takes you to the *Data Access Form*.
-That’s where you can select specific variables, apply filters (for example, only detections from a certain date or region), and download a subset of the data.
-This is the page most researchers use first, since it gives full control over what to request.
+* The **TableDAP** link opens the *Data Access Form*,
+  where you can select variables, apply filters (for example, a date range or location),
+  and download a filtered subset.
+* The **Make A Graph** link opens a lightweight plotting interface directly on the server.
+  It allows you to preview data patterns, such as plotting a glider’s depth through time
+  or visualizing detection locations by latitude and longitude.
+* The **Files** link, if available, provides access to raw data files,
+  typically in NetCDF or CSV format.
+* The **Metadata** and **Background Info** links lead to documentation describing
+  the dataset, including variable definitions, units, collection methods, licensing,
+  and citation details.
 
-The link under **“Make A Graph”** opens a lightweight plotting interface directly on the server.
-It’s a quick way to visualize patterns, for instance, you can plot a glider’s depth through time or see where animals were detected along latitude and longitude.
-It’s not meant for final figures, but it’s perfect for checking if the data behave as expected before you start coding.
+Each dataset also has a short **Dataset ID**, such as `otn_aat_detections`
+or `otn200_20220912_116_realtime`.
+This identifier is used in R, Python, or programmatic queries to specify which dataset
+to access.
 
-Some datasets also include a **“Files”** link, which points to raw data files, usually in NetCDF or CSV format.
-This is useful if you want the complete dataset for offline work rather than a filtered subset.
+The catalog is the primary entry point for exploring OTN data.
+You can identify the dataset you need, review its metadata, and either
+download data directly or copy the generated URL for use in code.
 
-To the right, the **Metadata** and **Background Info** links take you to documentation pages that describe the dataset in detail:
-variable names, units, ranges, collection methods, licensing, and citation information.
-These pages are essential for understanding what you’re actually downloading and how to use it responsibly.
+---
 
-Finally, each dataset has a short **Dataset ID** in the far-right column, something like `otn_aat_detections` or `otn200_20220912_116_realtime`.
-That ID is what you’ll use in R, Python, or any programmatic query.
-It’s how ERDDAP knows which dataset you’re asking for.
+### The Data Access Form
 
-In practice, this catalog is the starting point for everything you do in ERDDAP.
-You find the dataset you want here, click through to explore it, and then either download it manually or copy the generated URL into your code.
-Once you know how to read this page, you can move through the rest of ERDDAP effortlessly.
-
-## The Data Access Form
-
-Clicking a dataset’s **data** link opens the *Data Access Form* — an interactive page where you can explore variables, apply filters, and build precise queries before downloading.
+Selecting a dataset’s **data** link opens the *Data Access Form*,
+an interactive interface for exploring variables, applying filters,
+and building precise queries before downloading.
 
 <p align="center" style="display: flex; justify-content: center; gap: 15px;">
   <img src="../fig/erddap_data_access_form.png" alt="ERDDAP Data Access Form showing variable and filter options" width="48%">
   <img src="../fig/erddap_data_access_preview.png" alt="ERDDAP data preview after clicking Submit" width="48%">
 </p>
 
-Each row in the form represents a variable, such as `time`, `latitude`, `longitude`, or `depth`. You can tick the boxes beside the variables you want, or add constraints beside them to narrow your search — for example, a specific time window or a latitude range. At the bottom, the **File type** menu controls how ERDDAP returns your data. Most people start with `.csv` for quick analysis, though `.json` or `.nc` formats work just as easily.
+Each row in the form corresponds to a variable, such as `time`, `latitude`,
+`longitude`, or `depth`.
+You can check boxes to include variables or enter constraints to limit results
+(for example, a specific time window or latitude range).
 
-When you’re ready, there are two paths forward. Clicking **Submit** runs your query instantly and shows the results as a live table in your browser. It’s a fast way to confirm that your filters worked and that the dataset contains what you expect. Alternatively, you can choose **“Just generate the URL”**. That option builds a reusable link that encodes everything you’ve selected, the dataset ID, variables, filters, and file format so you can paste it directly into a browser, R script, or Python notebook and get the exact same data again.
+At the bottom of the form, the **File type** menu controls the format
+in which ERDDAP returns data.
+CSV (`.csv`) is a common choice for quick analysis,
+but JSON (`.json`) or NetCDF (`.nc`) formats work equally well.
 
-## The “Make A Graph” Tool
+When ready, you can either:
 
-Right beside the **data** link in each ERDDAP dataset, you’ll find **Make A Graph**, a quick way to visualize data directly on the server before downloading anything.
+* Click **Submit** to run the query and preview results directly in the browser, or
+* Choose **Just generate the URL** to create a reusable link encoding
+  all selected variables, filters, and output format.
+
+This link can be copied into a browser, R script, or Python notebook
+to reproduce the same query at any time.
+
+---
+
+### The “Make A Graph” Tool
+
+The **Make A Graph** option allows you to visualize data on the ERDDAP server
+before downloading.
 
 <p align="center">
   <img src="../fig/erddap_make_a_graph.png" alt="ERDDAP Make A Graph interface showing variable selection and plot preview" width="65%">
 </p>
 
-This page works a lot like the Data Access Form but adds a plotting panel at the bottom. You can choose which variable to plot on the X and Y axes, apply filters to limit time or space, and preview the results as a simple line, scatter, or depth profile. It’s meant for exploration rather than publication, a lightweight way to check data coverage, spot trends, or verify that your filters are returning what you expect.
+This tool functions similarly to the Data Access Form but adds a plotting interface.
+You can select X and Y variables, apply filters, and preview data as line, scatter,
+or depth profile plots.
+It is intended for quick data exploration—useful for checking coverage,
+identifying trends, or confirming that filters are working as expected.
 
-When you click **Redraw the graph**, ERDDAP builds the plot instantly. Below it, you’ll see a caption and a direct URL that reproduces the same visualization. That link works the same way as the data URLs: it encodes every choice you’ve made, dataset, variables, filters, and plot type, so anyone can re-create the same graph later.
-
-## Other Features in ERDDAP
-
-Beyond the data and graph tools, ERDDAP also provides a few other views that help you understand each dataset in more depth.
-
-The **Metadata** link opens a detailed description of the dataset, every variable, its units, range, and data type, along with global attributes such as license, citation, and time coverage. It’s the reference point for anyone wanting to understand what the data represent or how they were collected.
-
-The **Background Info** page offers a higher-level summary: where the dataset came from, which project or instrument produced it, and sometimes links to external documentation or related studies. It’s especially helpful when working with glider or animal tracking data, where context matters as much as the measurements themselves.
-
-Some datasets also include a **Files** link. This provides direct access to pre-packaged data files, often in NetCDF or CSV or Parquet, for users who prefer to download entire archives instead of making filtered requests. It’s a straightforward option when you want everything, not just a subset.
-
-Together, these pages make ERDDAP more than just a data portal. It’s a complete environment for discovery — you can inspect, filter, visualize, and document the same dataset without ever leaving the interface. Once you know how these parts fit together, you can move confidently between browsing in the web interface and automating the same workflows in R or Python.
+When you click **Redraw the graph**, ERDDAP generates the plot immediately.
+A caption and a direct URL appear below the graph;
+this URL reproduces the same visualization and can be shared or reused later.
 
 ---
+
+### Other Features in ERDDAP
+
+In addition to the data and graph tools, ERDDAP provides several supporting views
+that help users understand datasets in detail.
+
+* The **Metadata** page lists all variables, their units, ranges,
+  and data types, as well as global attributes such as license, citation,
+  and time coverage.
+* The **Background Info** page provides contextual details—
+  for example, project origin, instrument type, or links to related documentation.
+* The **Files** view (when available) offers complete data archives,
+  often in NetCDF, CSV, or Parquet format,
+  for users who prefer to download full datasets rather than filtered subsets.
+
+Together, these tools make ERDDAP a comprehensive environment
+for data discovery and access.
+They allow you to inspect, filter, visualize, and document datasets
+directly within the web interface, and then replicate those workflows
+programmatically in R or Python.

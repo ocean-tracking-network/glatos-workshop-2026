@@ -20,91 +20,57 @@ keypoints:
 
 ## What is GeoServer?
 
-GeoServer is an **open-source server** that follows international OGC (Open Geospatial Consortium) standards to share spatial data:
+GeoServer is an open-source server that implements OGC standards for sharing spatial data. It can deliver vector features via WFS, map images via WMS, and raster coverages via WCS.
 
-- **WFS (Web Feature Service):** vector features (points, lines, polygons)  
-- **WMS (Web Map Service):** map images (good for viewing, not analysis)  
-- **WCS (Web Coverage Service):** raster data (e.g. grids, surfaces)
+At OTN, GeoServer is used to publish infrastructure layers such as station and receiver deployments, mooring sites, and project footprints. These layers support tasks like plotting receiver locations, filtering detections by location, and integrating OTN data into GIS workflows.
 
-**How OTN uses it**  
-OTN publishes **infrastructure layers** through GeoServer — things like:
-
-- station and receiver deployments  
-- mooring sites  
-- project footprints  
-
-These layers let researchers:
-
-- plot receiver locations on maps  
-- filter detections by space  
-- combine OTN infrastructure with their own GIS workflows  
-
-In short: GeoServer is OTN’s **map server**.  
-For reproducible analysis we’ll focus on **WFS**, since it delivers data in tabular or spatial formats that R and Python can read directly.
+For reproducible analysis, this lesson focuses on WFS because it returns tabular and spatial formats that R and Python can read directly.
 
 ## Anatomy of a WFS GetFeature request
 
-A WFS request is just a URL with parts you can mix and match:
+A WFS `GetFeature` request is a URL composed of key–value parameters.
 
-```text
+~~~
 https://members.oceantrack.org/geoserver/otn/ows?
 service=WFS&
 version=1.0.0&
 request=GetFeature&
 typeName=otn:stations_receivers&
 outputFormat=csv
-````
-### What each part means
+~~~
+{: .language-text}
 
-**Base endpoint**  
-: `https://members.oceantrack.org/geoserver/otn/ows?`
+**Parameters**
 
-**service=WFS**  
-: `specifies the service type (Web Feature Service)`
+| Parameter      | Example                                             | Purpose                                                      |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+| Base endpoint  | `https://members.oceantrack.org/geoserver/otn/ows?` | GeoServer OWS endpoint                                       |
+| `service`      | `WFS`                                               | Service type                                                 |
+| `version`      | `1.0.0`                                             | WFS version                                                  |
+| `request`      | `GetFeature`                                        | Operation to fetch vector features                           |
+| `typeName`     | `otn:stations_receivers`                            | Layer name (workspace:name)                                  |
+| `outputFormat` | `csv`                                               | Output format (e.g., `csv`, `application/json`, `SHAPE-ZIP`) |
 
-**version=1.0.0**  
-: `version of the WFS standard to use`
+**Optional filters**
 
-**request=GetFeature**  
-: `the action to perform: fetch vector features`
-
-**typeName=otn:stations_receivers**  
-: `the layer to request`
-
-**outputFormat=csv**  
-: `format for the results (CSV, GeoJSON, Shapefile/ZIP)`
-
-### Optional filters
-
-```text
+~~~
 &bbox=-70,40,-40,60,EPSG:4326
-```
+~~~
+{: .language-text}
 
-> Restrict features to a geographic bounding box (minLon, minLat, maxLon, maxLat, CRS)
+Restricts results to a bounding box (minLon, minLat, maxLon, maxLat, CRS).
 
-```text
+~~~
 &cql_filter=collectioncode='MAST'
-```
+~~~
+{: .language-text}
 
-> Filter features by attribute values (here, only rows where `collectioncode = MAST`)
+Filters by attribute values using CQL.
 
-------------------------------------------------------------------------
+![OTN GeoServer catalog with otn highlighted](../fig/geoserver_layers.png)
 
-<p align="center">
-  <img src="../fig/geoserver_layers.png" alt="OTN GeoServer catalog with otn:stations_receivers highlighted" width="80%">
-</p>
+The GeoServer catalog at geoserver.oceantrack.org lets you browse layers (e.g., stations, receivers, animals, project footprints) and download data in formats such as CSV, GeoJSON, or Shapefile. By default, downloads are limited to 50 features; increase the limit by adding a parameter such as `&maxFeatures=50000`. For reproducible workflows, build a WFS request URL and load the data programmatically in R or Python.
 
-The screenshot above shows the **GeoServer catalog** at [geoserver.oceantrack.org](http://geoserver.oceantrack.org/).  
-From this interface you can:
-
-- Browse layers such as stations, receivers, animals, and project footprints  
-- Download data directly (CSV, GeoJSON, Shapefile, etc.)  
-
-Note: by default, downloads are limited to **50 features**. To retrieve larger datasets you must adjust the request (e.g. add `&maxFeatures=50000`).  
-
-For reproducible workflows, it is better to build a **WFS request URL** and load the data programmatically in R or Python (examples below).
-
-------------------------------------------------------------------------
 
 # Accessing OTN GeoServer Data
 
