@@ -28,12 +28,6 @@ For reproducible analysis, this lesson focuses on WFS because it returns tabular
 
 ## GeoServer Layer Definitions
 
-OTN publishes several spatial data layers through its GeoServer service.
-These definitions are summarized from the [OTN Publication Information page](https://members.oceantrack.org/data/publication-information).
-
-
-## GeoServer Layer Definitions
-
 OTN publishes multiple spatial layers through its GeoServer service.
 These layers describe network infrastructure, metadata, and partner data products.
 Descriptions below are summarized from the [OTN Publication Information page](https://members.oceantrack.org/data/publication-information).
@@ -113,6 +107,25 @@ Restricts results to a bounding box (minLon, minLat, maxLon, maxLat, CRS).
 
 Filters by attribute values using CQL.
 
+**Filtering by Bounds (Spatial and Temporal)**
+
+For many projects, you’ll want to narrow your results to a specific study area and time window. This can be done directly in the WFS request using a `bbox=` parameter, or after downloading the layer in R or Python. The simplest WFS form is:
+
+```
+&bbox=minLon,minLat,maxLon,maxLat,EPSG:4326
+```
+
+For example:
+
+```
+&bbox=-70,40,-40,60,EPSG:4326
+```
+
+In some workflows, especially when combining receiver deployments with detections or project timelines, it’s useful to filter data after download instead. Naomi Tress provides an example of this approach: she defines project latitude/longitude limits, sets start and end dates, then filters the full `stations_receivers` layer by deployment and recovery dates. Receivers with no reported recovery date can also be kept if they are likely still active, using expected lifespans for different receiver models (e.g., VR2W, VR3, VR4). After the temporal filtering, latitude and longitude are used to keep only receivers inside the study bounds.
+
+This method offers precise control over which receivers were active in your region during the period of interest, and complements the simpler server-side `bbox=` filter.
+
+
 ![OTN GeoServer catalog with otn highlighted](../fig/geoserver_layers.png)
 
 The GeoServer catalog at geoserver.oceantrack.org lets you browse layers (e.g., stations, receivers, animals, project footprints) and download data in formats such as CSV, GeoJSON, or Shapefile. By default, downloads are limited to 50 features; increase the limit by adding a parameter such as `&maxFeatures=50000`. For reproducible workflows, build a WFS request URL and load the data programmatically in R or Python.
@@ -169,6 +182,59 @@ receivers = pd.read_csv(wfs_csv)
 # 3) Preview first rows
 print(receivers.head())
 ```
+
+## Follow Along: Filtering OTN Receivers in R
+
+Sometimes you only need receivers that were active during a certain time window and inside your study region.
+Here’s a short example showing how to define those bounds, download the layer once, and filter it.
+
+### Define study window and region
+
+```r
+library(tidyverse)
+library(lubridate)
+
+study_start <- ymd("2019-01-01")
+study_end   <- ymd("2020-01-01")
+
+lon_lo <- -70; lon_hi <- -40
+lat_lo <- 40;  lat_hi <- 60
+```
+
+### Download receivers layer
+
+```r
+receivers <- readr::read_csv(
+  "https://members.oceantrack.org/geoserver/otn/ows?
+   service=WFS&version=1.0.0&request=GetFeature&
+   typeName=otn:stations_receivers&outputFormat=csv",
+  guess_max = 20000
+)
+```
+
+### Filter by time and space
+
+```r
+filtered <- receivers %>%
+  filter(!is.na(deploy_date)) %>%
+  filter(
+    deploy_date <= study_end &
+      (is.na(recovery_date) | recovery_date >= study_start)
+  ) %>%
+  filter(
+    stn_long >= lon_lo & stn_long <= lon_hi,
+    stn_lat  >= lat_lo & stn_lat  <= lat_hi
+  )
+
+head(filtered)
+```
+
+### (Optional) Save your filtered receivers to CSV
+
+```r
+write_csv(filtered, "otn_receivers_filtered.csv")
+```
+
 ## Follow Along: Mapping OTN Data in Python
 
 Now let’s go one step further: **visualizing animal detections and station deployments on an interactive map.** We’ll use `folium` to create a Leaflet web map.
