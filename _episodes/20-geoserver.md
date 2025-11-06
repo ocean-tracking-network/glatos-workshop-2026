@@ -26,6 +26,52 @@ At OTN, GeoServer is used to publish infrastructure layers such as station and r
 
 For reproducible analysis, this lesson focuses on WFS because it returns tabular and spatial formats that R and Python can read directly.
 
+## GeoServer Layer Definitions
+
+OTN publishes several spatial data layers through its GeoServer service.
+These definitions are summarized from the [OTN Publication Information page](https://members.oceantrack.org/data/publication-information).
+
+
+## GeoServer Layer Definitions
+
+OTN publishes multiple spatial layers through its GeoServer service.
+These layers describe network infrastructure, metadata, and partner data products.
+Descriptions below are summarized from the [OTN Publication Information page](https://members.oceantrack.org/data/publication-information).
+
+`otn:animals`: A history of deployed tags and which species to which they were attached.
+
+`otn:contacts`: Contact information and project associations for all affiliated OTN partners.
+
+`otn:glatos_project_averaged`: Average location coordinates for GLATOS projects, showing one representative point per project.
+
+`otn:gs_species`: Species listed by project, with scientific/common names, collaboration type, record totals, and AphiaID.
+
+`otnnewprod:gs_species`: Species listed by project, with scientific/common names, collaboration type, record totals, and AphiaID.
+
+`otn:imosatf_project_averaged`: Average coordinates for IMOS ATF projects, giving one centroid point per project.
+
+`otn:mstr_contacts`: Contact records for project contributors, including names, roles, affiliation, email, ORCID, and project association.
+
+`otn:mysterytags`: Unidentified tag detections by region and year, listing tag IDs and associated detection counts.
+
+`otn:otn_resources_metadata`: Project-level metadata with project names, descriptions, status, locality, collaboration type, citation, website, and project footprint polygons.
+
+`otn:otn_resources_metadata_points`: Project metadata represented as point features, including project names, status, collaboration type, total records, and project footprint polygons.
+
+`otn:project_metadata`: A listing of each OTN and partner-affiliated project.
+
+`otn:receiver_fishery_interactions`: Records of receiver deployment outcomes where gear was lost, failed, or moved, including station details, dates, instrument type, and notes on recovery or failure.
+
+`otn:stations`: A list of all the locations at which there have been receivers deployed.
+
+`otn:stations_history`: A list of all receiver deployments, along with any user-submitted 'proposed' instrument deployments, with future-dated deployments and status of 'proposed'.
+
+`otn:stations_receivers`: Receiver deployment records with station name, location, model, deployment and recovery dates, depth, offset, download history, and receiver status.
+
+`otn:stations_series`: A list of all the receiver deployments OTN is aware of, with locations, instrument serial number, start and end dates, and project affiliation.
+
+`otn:vr4_mooring_history`: Deployment and recovery history for VR4 moorings, including coordinates, dates, last downloads, and principal investigator details.
+
 ## Anatomy of a WFS GetFeature request
 
 A WFS `GetFeature` request is a URL composed of key–value parameters.
