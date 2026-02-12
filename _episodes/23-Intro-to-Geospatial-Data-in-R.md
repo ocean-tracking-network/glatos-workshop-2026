@@ -89,15 +89,15 @@ The detections and receiver datasets used in the exercises will be introduced af
 
 ## Spatial data concepts (vector and raster)
 
-Spatial data (also called geospatial data) is data that includes information about location on the Earth. In practice, spatial datasets usually combine location information (for example, coordinates or boundaries) with attribute data that describes what was observed (for example, a tag ID, receiver ID, detection time, species, or deployment details). ([TechTarget][1])
+Spatial data (also called geospatial data) is data that includes information about location on the Earth. In practice, spatial datasets usually combine location information (for example, coordinates or boundaries) with attribute data that describes what was observed (for example, a tag ID, receiver ID, detection time, species, or deployment details).
 
-What makes spatial data different from a regular table is that location can be used directly in analysis. Instead of only asking “how many detections happened,” you can ask questions such as “which detections occurred near a receiver,” “which detections fall inside a study area,” or “how far apart were consecutive detections.” These questions depend on how location is represented and measured. ([TechTarget][1])
+What makes spatial data different from a regular table is that location can be used directly in analysis. Instead of only asking “how many detections happened,” you can ask questions such as “which detections occurred near a receiver,” “which detections fall inside a study area,” or “how far apart were consecutive detections.” These questions depend on how location is represented and measured. 
 
-Spatial data is commonly represented in two formats: **vector** and **raster**. ([TechTarget][1])
+Spatial data is commonly represented in two formats: **vector** and **raster**.
 
 <p align="center"> <img src="../fig/gis_data.avif" alt="Diagram showing examples of vector and raster geospatial data" width="85%"> </p>
 
-**Vector data** represents discrete features as geometries. The main geometry types are points, lines, and polygons. A **point** represents a single location, such as a receiver station or a detection location. A **line** can represent a path or track, such as connecting detections in time order for a single tag. A **polygon** represents an area, such as a study boundary or a buffer region around a receiver. Vector data is most useful when you care about individual features and their relationships (for example, distance to the nearest receiver, whether a point falls inside a polygon, or overlap between areas). ([TechTarget][1])
+**Vector data** represents discrete features as geometries. The main geometry types are points, lines, and polygons. A **point** represents a single location, such as a receiver station or a detection location. A **line** can represent a path or track, such as connecting detections in time order for a single tag. A **polygon** represents an area, such as a study boundary or a buffer region around a receiver. Vector data is most useful when you care about individual features and their relationships (for example, distance to the nearest receiver, whether a point falls inside a polygon, or overlap between areas).
 
 **Raster data** represents a surface as a grid of cells. Each cell stores a value, such as temperature, depth, chlorophyll, or elevation. Raster data is often used for continuous variables that change across space. Key raster properties are the **extent** (the area covered), **resolution** (cell size), and the coordinate reference system used to locate the grid on the Earth. Higher resolution (smaller cells) increases spatial detail but also increases data size and computation time. ([TechTarget][1])
 
