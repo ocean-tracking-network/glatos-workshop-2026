@@ -351,6 +351,10 @@ st_crs(deployments_utm)
 > >   {: .solution}
 > >   {: .challenge}
 
+If you want a deeper overview of coordinate reference systems and projections, you can refer the following links:
+1] https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/
+
+2] https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs
 
 ## When CRS choice matters (distance vs area vs angles)
 
@@ -559,4 +563,3 @@ plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
 This lesson introduced the core workflow for working with geospatial data in R. You converted telemetry tables into spatial objects with `sf`, used CRS metadata to correctly align layers and support measurement-based operations, and ran a simple distance-based example using buffers. You also introduced raster data with `terra` by loading a gridded depth layer and extracting values at detection locations.
 
 From here, the same steps can be applied to common tasks such as nearest-receiver summaries, points-in-polygons queries, creating simple tracks from time-ordered detections, and extracting additional environmental layers (for example, temperature or chlorophyll) once an appropriate raster product and time slice are selected.
-
