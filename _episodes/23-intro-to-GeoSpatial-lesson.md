@@ -61,7 +61,7 @@ install.packages("glatos")
 
 {: .language-r}
 
-If you have trouble installing `glatos`, use the workshop installation link/instructions provided by the instructor.
+If you have trouble installing `glatos`, you can refer the instructions here: https://github.com/ocean-tracking-network/glatos
 
 ### Load packages (run at the start of each R session)
 
