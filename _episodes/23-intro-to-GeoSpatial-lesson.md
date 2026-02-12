@@ -351,10 +351,7 @@ st_crs(deployments_utm)
 > >   {: .solution}
 > >   {: .challenge}
 
-If you want a deeper overview of coordinate reference systems and projections, you can refer the following links:
-1] https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/
-
-2] https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs
+If you want a deeper overview of coordinate reference systems and projections, you can refer the following links: https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/ and https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs
 
 ## When CRS choice matters (distance vs area vs angles)
 
