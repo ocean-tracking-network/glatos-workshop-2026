@@ -26,7 +26,7 @@ The **Ocean Tracking Network (OTN)** makes much of its data publicly available. 
 
 ------------------------------------------------------------------------
 
-![OTN Public Endpoints Diagram](../fig/113/public_endpoints.png)
+![OTN Public Endpoints Diagram](../fig/Path_of_data.png)
 
 ------------------------------------------------------------------------
 
@@ -37,21 +37,21 @@ The **Ocean Tracking Network (OTN)** makes much of its data publicly available. 
     -   Human-friendly entry point.
     -   Provides search and links to datasets across OTN systems.
 
--   **GeoServer (spatial layers):**
+-   **GeoServer (spatial layers):** <http://geoserver.oceantrack.org/geoserver/web/?1>
 
     -   Serves GIS-ready data via WFS/WMS (e.g., CSV, GeoJSON).
     -   Best for mapping stations, receivers, and moorings.
     -   Example: integrating OTN station layers in QGIS.
     -   → See: *GeoServer episode*.
 
--   **OBIS (biodiversity occurrences):**
+-   **OBIS (biodiversity occurrences):** <https://obis.org/node/68f83ea7-69a7-44fd-be77-3c3afd6f3cf8>
 
     -   Global standard for species occurrence data.
     -   OTN contributes datasets with UUID identifiers.
     -   Ideal for querying animal presence/absence or species distribution.
     -   → See: *OBIS episode*.
 
--   **ERDDAP (tabular/time-series):**
+-   **ERDDAP (tabular/time-series):** <https://erddap.oceantrack.org/erddap/index.html>
 
     -   Provides time-series and detection datasets in formats like CSV, JSON, NetCDF.
     -   Supports subsetting and reproducible queries.

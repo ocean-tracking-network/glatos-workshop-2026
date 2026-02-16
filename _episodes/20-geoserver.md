@@ -20,91 +20,116 @@ keypoints:
 
 ## What is GeoServer?
 
-GeoServer is an **open-source server** that follows international OGC (Open Geospatial Consortium) standards to share spatial data:
+GeoServer is an open-source server that implements OGC standards for sharing spatial data. It can deliver vector features via WFS, map images via WMS, and raster coverages via WCS.
 
-- **WFS (Web Feature Service):** vector features (points, lines, polygons)  
-- **WMS (Web Map Service):** map images (good for viewing, not analysis)  
-- **WCS (Web Coverage Service):** raster data (e.g. grids, surfaces)
+At OTN, GeoServer is used to publish infrastructure layers such as station and receiver deployments, mooring sites, and project footprints. These layers support tasks like plotting receiver locations, filtering detections by location, and integrating OTN data into GIS workflows.
 
-**How OTN uses it**  
-OTN publishes **infrastructure layers** through GeoServer — things like:
+For reproducible analysis, this lesson focuses on WFS because it returns tabular and spatial formats that R and Python can read directly.
 
-- station and receiver deployments  
-- mooring sites  
-- project footprints  
+## GeoServer Layer Definitions
 
-These layers let researchers:
+OTN publishes multiple spatial layers through its GeoServer service.
+These layers describe network infrastructure, metadata, and partner data products.
+Descriptions below are summarized from the [OTN Publication Information page](https://members.oceantrack.org/data/publication-information).
 
-- plot receiver locations on maps  
-- filter detections by space  
-- combine OTN infrastructure with their own GIS workflows  
+`otn:animals`: A history of deployed tags and which species to which they were attached.
 
-In short: GeoServer is OTN’s **map server**.  
-For reproducible analysis we’ll focus on **WFS**, since it delivers data in tabular or spatial formats that R and Python can read directly.
+`otn:contacts`: Contact information and project associations for all affiliated OTN partners.
+
+`otn:glatos_project_averaged`: Average location coordinates for GLATOS projects, showing one representative point per project.
+
+`otn:gs_species`: Species listed by project, with scientific/common names, collaboration type, record totals, and AphiaID.
+
+`otnnewprod:gs_species`: Species listed by project, with scientific/common names, collaboration type, record totals, and AphiaID.
+
+`otn:imosatf_project_averaged`: Average coordinates for IMOS ATF projects, giving one centroid point per project.
+
+`otn:mstr_contacts`: Contact records for project contributors, including names, roles, affiliation, email, ORCID, and project association.
+
+`otn:mysterytags`: Unidentified tag detections by region and year, listing tag IDs and associated detection counts.
+
+`otn:otn_resources_metadata`: Project-level metadata with project names, descriptions, status, locality, collaboration type, citation, website, and project footprint polygons.
+
+`otn:otn_resources_metadata_points`: Project metadata represented as point features, including project names, status, collaboration type, total records, and project footprint polygons.
+
+`otn:project_metadata`: A listing of each OTN and partner-affiliated project.
+
+`otn:receiver_fishery_interactions`: Records of receiver deployment outcomes where gear was lost, failed, or moved, including station details, dates, instrument type, and notes on recovery or failure.
+
+`otn:stations`: A list of all the locations at which there have been receivers deployed.
+
+`otn:stations_history`: A list of all receiver deployments, along with any user-submitted 'proposed' instrument deployments, with future-dated deployments and status of 'proposed'.
+
+`otn:stations_receivers`: Receiver deployment records with station name, location, model, deployment and recovery dates, depth, offset, download history, and receiver status.
+
+`otn:stations_series`: A list of all the receiver deployments OTN is aware of, with locations, instrument serial number, start and end dates, and project affiliation.
+
+`otn:vr4_mooring_history`: Deployment and recovery history for VR4 moorings, including coordinates, dates, last downloads, and principal investigator details.
 
 ## Anatomy of a WFS GetFeature request
 
-A WFS request is just a URL with parts you can mix and match:
+A WFS `GetFeature` request is a URL composed of key–value parameters.
 
-```text
+~~~
 https://members.oceantrack.org/geoserver/otn/ows?
 service=WFS&
 version=1.0.0&
 request=GetFeature&
 typeName=otn:stations_receivers&
 outputFormat=csv
-````
-### What each part means
+~~~
+{: .language-text}
 
-**Base endpoint**  
-: `https://members.oceantrack.org/geoserver/otn/ows?`
+**Parameters**
 
-**service=WFS**  
-: `specifies the service type (Web Feature Service)`
+| Parameter      | Example                                             | Purpose                                                      |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+| Base endpoint  | `https://members.oceantrack.org/geoserver/otn/ows?` | GeoServer OWS endpoint                                       |
+| `service`      | `WFS`                                               | Service type                                                 |
+| `version`      | `1.0.0`                                             | WFS version                                                  |
+| `request`      | `GetFeature`                                        | Operation to fetch vector features                           |
+| `typeName`     | `otn:stations_receivers`                            | Layer name (workspace:name)                                  |
+| `outputFormat` | `csv`                                               | Output format (e.g., `csv`, `application/json`, `SHAPE-ZIP`) |
 
-**version=1.0.0**  
-: `version of the WFS standard to use`
+**Optional filters**
 
-**request=GetFeature**  
-: `the action to perform: fetch vector features`
+~~~
+&bbox=-70,40,-40,60,EPSG:4326
+~~~
+{: .language-text}
 
-**typeName=otn:stations_receivers**  
-: `the layer to request`
+Restricts results to a bounding box (minLon, minLat, maxLon, maxLat, CRS).
 
-**outputFormat=csv**  
-: `format for the results (CSV, GeoJSON, Shapefile/ZIP)`
+~~~
+&cql_filter=collectioncode='MAST'
+~~~
+{: .language-text}
 
-### Optional filters
+Filters by attribute values using CQL.
 
-```text
+**Filtering by Bounds (Spatial and Temporal)**
+
+For many projects, you’ll want to narrow your results to a specific study area and time window. This can be done directly in the WFS request using a `bbox=` parameter, or after downloading the layer in R or Python. The simplest WFS form is:
+
+```
+&bbox=minLon,minLat,maxLon,maxLat,EPSG:4326
+```
+
+For example:
+
+```
 &bbox=-70,40,-40,60,EPSG:4326
 ```
 
-> Restrict features to a geographic bounding box (minLon, minLat, maxLon, maxLat, CRS)
+In some workflows, especially when combining receiver deployments with detections or project timelines, it’s useful to filter data after download instead. Naomi Tress provides an example of this approach: she defines project latitude/longitude limits, sets start and end dates, then filters the full `stations_receivers` layer by deployment and recovery dates. Receivers with no reported recovery date can also be kept if they are likely still active, using expected lifespans for different receiver models (e.g., VR2W, VR3, VR4). After the temporal filtering, latitude and longitude are used to keep only receivers inside the study bounds.
 
-```text
-&cql_filter=collectioncode='MAST'
-```
+This method offers precise control over which receivers were active in your region during the period of interest, and complements the simpler server-side `bbox=` filter.
 
-> Filter features by attribute values (here, only rows where `collectioncode = MAST`)
 
-------------------------------------------------------------------------
+![OTN GeoServer catalog with otn highlighted](../fig/geoserver_layers.png)
 
-<p align="center">
-  <img src="../fig/geoserver_layers.png" alt="OTN GeoServer catalog with otn:stations_receivers highlighted" width="80%">
-</p>
+The GeoServer catalog at geoserver.oceantrack.org lets you browse layers (e.g., stations, receivers, animals, project footprints) and download data in formats such as CSV, GeoJSON, or Shapefile. By default, downloads are limited to 50 features; increase the limit by adding a parameter such as `&maxFeatures=50000`. For reproducible workflows, build a WFS request URL and load the data programmatically in R or Python.
 
-The screenshot above shows the **GeoServer catalog** at [geoserver.oceantrack.org](http://geoserver.oceantrack.org/).  
-From this interface you can:
-
-- Browse layers such as stations, receivers, animals, and project footprints  
-- Download data directly (CSV, GeoJSON, Shapefile, etc.)  
-
-Note: by default, downloads are limited to **50 features**. To retrieve larger datasets you must adjust the request (e.g. add `&maxFeatures=50000`).  
-
-For reproducible workflows, it is better to build a **WFS request URL** and load the data programmatically in R or Python (examples below).
-
-------------------------------------------------------------------------
 
 # Accessing OTN GeoServer Data
 
@@ -157,6 +182,59 @@ receivers = pd.read_csv(wfs_csv)
 # 3) Preview first rows
 print(receivers.head())
 ```
+
+## Follow Along: Filtering OTN Receivers in R
+
+Sometimes you only need receivers that were active during a certain time window and inside your study region.
+Here’s a short example showing how to define those bounds, download the layer once, and filter it.
+
+### Define study window and region
+
+```r
+library(tidyverse)
+library(lubridate)
+
+study_start <- ymd("2019-01-01")
+study_end   <- ymd("2020-01-01")
+
+lon_lo <- -70; lon_hi <- -40
+lat_lo <- 40;  lat_hi <- 60
+```
+
+### Download receivers layer
+
+```r
+receivers <- readr::read_csv(
+  "https://members.oceantrack.org/geoserver/otn/ows?
+   service=WFS&version=1.0.0&request=GetFeature&
+   typeName=otn:stations_receivers&outputFormat=csv",
+  guess_max = 20000
+)
+```
+
+### Filter by time and space
+
+```r
+filtered <- receivers %>%
+  filter(!is.na(deploy_date)) %>%
+  filter(
+    deploy_date <= study_end &
+      (is.na(recovery_date) | recovery_date >= study_start)
+  ) %>%
+  filter(
+    stn_long >= lon_lo & stn_long <= lon_hi,
+    stn_lat  >= lat_lo & stn_lat  <= lat_hi
+  )
+
+head(filtered)
+```
+
+### (Optional) Save your filtered receivers to CSV
+
+```r
+write_csv(filtered, "otn_receivers_filtered.csv")
+```
+
 ## Follow Along: Mapping OTN Data in Python
 
 Now let’s go one step further: **visualizing animal detections and station deployments on an interactive map.** We’ll use `folium` to create a Leaflet web map.
@@ -363,6 +441,65 @@ Here are a few useful extras:
   → Always include the EPSG code at the end.
 
 These options make requests faster, lighter, and more reproducible.
+
+---
+## Assessment
+
+> ## Check your understanding
+> You’ve been asked to map receiver stations for a regional study area between longitudes −70 and −40 and latitudes 40 to 60.  
+> Which of the following WFS URLs would return the right subset **as CSV**?
+>
+> 1. `...?service=WFS&request=GetFeature&typeName=otn:stations_receivers&bbox=40,-70,60,-40&outputFormat=csv`  
+> 2. `...?service=WFS&request=GetFeature&typeName=otn:stations_receivers&bbox=-70,40,-40,60,EPSG:4326&outputFormat=csv`  
+> 3. `...?service=WMS&layers=otn:stations_receivers&bbox=-70,40,-40,60&format=image/png`
+>
+> > ## Solution
+> > **Option 2.**  
+> > It uses the correct coordinate order (minLon,minLat,maxLon,maxLat), includes the CRS, and requests `WFS` data as CSV.  
+> > Option 1 swaps lat/lon; Option 3 is WMS, which only returns an image.
+> {: .solution}
+{: .challenge}
+
+---
+
+> ## Spot the issue
+> A user reports that this request only returns 50 features, even though the dataset is much larger:  
+>
+> ```
+> https://members.oceantrack.org/geoserver/otn/ows?service=WFS&version=1.0.0&
+> request=GetFeature&typeName=otn:stations_receivers&outputFormat=csv
+> ```
+>
+> What could you add to return more data?
+>
+> > ## Solution
+> > Add a **limit parameter**, e.g. `&maxFeatures=50000`.  
+> > GeoServer defaults to 50 results per query unless you raise that limit.
+> {: .solution}
+{: .challenge}
+
+---
+
+> ## Construct a filtered query
+> You only want receivers from the `MAST` project in your region of interest.  
+> Write the filter part of a WFS request that would do this.
+>
+> > ## Solution
+> > Use a CQL filter:  
+> > `&cql_filter=collectioncode='MAST'&bbox=-70,40,-40,60,EPSG:4326`  
+> > You can combine multiple filters using `AND` or `OR` if needed.
+> {: .solution}
+{: .challenge}
+
+---
+
+> ## Short answer
+> Why might someone prefer `outputFormat=application/json` over `outputFormat=csv`?
+>
+> > ## Solution
+> > JSON (or GeoJSON) keeps geometry in a structured spatial format that GIS software and libraries like `leaflet`, `folium`, and `geopandas` can read directly for mapping, while CSV flattens coordinates into columns.
+> {: .solution}
+{: .challenge}
 
 ---
 
