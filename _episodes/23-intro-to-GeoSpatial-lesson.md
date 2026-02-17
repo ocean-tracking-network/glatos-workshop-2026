@@ -1,5 +1,5 @@
 ---
-title: Intro to Geospatial Data in R (sf + terra)
+title: Intro to Geospatial Data in R
 teaching: 45
 exercises: 30
 questions:
@@ -30,7 +30,7 @@ By the end of the lesson, participants will have taken telemetry-style detection
 
 ## Setup
 
-This lesson uses **R** in **RStudio**. Open RStudio and work from an R script (File → New File → R Script) so your code is saved.
+This lesson uses **R**. Open RStudio and work from an R script (File → New File → R Script) so your code is saved.
 
 We will use:
 
@@ -38,56 +38,52 @@ We will use:
 * `terra` for raster spatial data (grids)
 * `glatos` for telemetry-oriented workflows and example data structures
 
-### Install packages (run once per computer)
+### Install packages
 
 Install `sf` and `terra` from CRAN:
 
-```
+~~~
 install.packages(c("sf", "terra"))
-```
-
+~~~
 {: .language-r}
 
 Install `glatos` from the OTN R-universe repository:
 
-```
+~~~
 options(repos = c(
   otn  = "https://ocean-tracking-network.r-universe.dev",
   CRAN = "https://cloud.r-project.org"
 ))
 
 install.packages("glatos")
-```
-
+~~~
 {: .language-r}
 
 If you have trouble installing `glatos`, you can refer the instructions here: https://github.com/ocean-tracking-network/glatos
 
-### Load packages (run at the start of each R session)
+### Load packages
 
-```
+~~~
 library(sf)
 library(terra)
 library(glatos)
-```
-
+~~~
 {: .language-r}
 
 ### Verify the setup
 
 These commands should return version numbers without errors:
 
-```
+~~~
 packageVersion("sf")
 packageVersion("terra")
 packageVersion("glatos")
-```
-
+~~~
 {: .language-r}
 
 The detections and receiver datasets used in the exercises will be introduced after the spatial data concepts section.
 
-## Spatial data concepts (vector and raster)
+## Spatial data concepts
 
 Spatial data (also called geospatial data) is data that includes information about location on the Earth. In practice, spatial datasets usually combine location information (for example, coordinates or boundaries) with attribute data that describes what was observed (for example, a tag ID, receiver ID, detection time, species, or deployment details).
 
@@ -95,7 +91,7 @@ What makes spatial data different from a regular table is that location can be u
 
 Spatial data is commonly represented in two formats: **vector** and **raster**.
 
-<p align="center"> <img src="../fig/gis_data.avif" alt="Diagram showing examples of vector and raster geospatial data" width="85%"> </p>
+<p align="center"> <img src="../fig/gis_data.avif" alt="Diagram showing examples of vector and raster geospatial data" width="50%"> </p>
 
 **Vector data** represents discrete features as geometries. The main geometry types are points, lines, and polygons. A **point** represents a single location, such as a receiver station or a detection location. A **line** can represent a path or track, such as connecting detections in time order for a single tag. A **polygon** represents an area, such as a study boundary or a buffer region around a receiver. Vector data is most useful when you care about individual features and their relationships (for example, distance to the nearest receiver, whether a point falls inside a polygon, or overlap between areas). 
 
@@ -124,22 +120,20 @@ In an ocean monitoring context, a typical workflow uses both types. Detections a
 > > 3. Vector (line)
 > > 4. Vector (polygon)
 > > 5. Raster
-> >    {: .solution}
-> >    {: .challenge}
-
+> {: .solution}
+{: .challenge}
 
 ## Example data (detections and deployments)
 
 For this lesson, we will use the example detections and deployments CSV files that ship with `glatos`. `system.file()` is used to locate files that are included inside an installed package.
 
-```
+~~~
 det_csv <- system.file("extdata", "blue_shark_detections.csv", package = "glatos")
 dep_csv <- system.file("extdata", "hfx_deployments.csv",      package = "glatos")
 
 detections  <- read.csv(det_csv)
 deployments <- read.csv(dep_csv)
-```
-
+~~~
 {: .language-r}
 
 ### What these datasets represent
@@ -160,11 +154,10 @@ Other columns (for example, depth fields, receiver model fields, notes) are reta
 
 Check the column names:
 
-```
+~~~
 names(detections)
 names(deployments)
-```
-
+~~~
 {: .language-r}
 
 For these example datasets, the coordinate columns are:
@@ -186,7 +179,7 @@ At the moment, `detections` and `deployments` are regular tables. Even though th
 
 ### Create `sf` point objects
 
-```
+~~~
 # Detections as sf points ####
 detections_sf <- st_as_sf(
   detections,
@@ -207,15 +200,14 @@ class(deployments_sf)
 
 st_geometry(detections_sf)[1:3]
 st_geometry(deployments_sf)[1:3]
-```
-
+~~~
 {: .language-r}
 
 At this point, both objects have a geometry column, but they do not yet have a CRS assigned. The CRS step is covered in the next section.
 
 ### Quick plot
 
-```
+~~~
 plot(st_geometry(deployments_sf),
      pch = 16, cex = 0.8, asp = 1,
      main = "Receiver deployments and detections")
@@ -223,7 +215,7 @@ plot(st_geometry(deployments_sf),
 plot(st_geometry(detections_sf),
      pch = 16, cex = 0.5,
      add = TRUE)
-```
+~~~
 {: .language-r}
 
 The plot shows the receiver deployment locations (first layer) with detections overlaid on top (second layer). Both layers are being drawn using only their point geometries. At this stage, the objects do not have a coordinate reference system (CRS) assigned (CRS: NA), but the numeric values indicate these are longitude/latitude coordinates (negative longitudes and latitudes around ~44°). In the next section, a CRS will be assigned so the coordinates are formally defined and can be transformed when needed.
@@ -241,8 +233,8 @@ Because there can be many detections at the same receiver station, multiple poin
 > > ## Solution
 > >
 > > A correct result is that both objects print as `sf` objects, `names()` still lists the longitude/latitude columns, and the plot shows detections and deployments in overlapping geographic space.
-> > {: .solution}
-> > {: .challenge}
+>{: .solution}
+{: .challenge}
 
 
 ## Coordinate reference systems (CRS)
@@ -283,11 +275,10 @@ In `sf`:
 
 We created point geometries earlier; check whether CRS metadata is present:
 
-```
+~~~
 st_crs(detections_sf)
 st_crs(deployments_sf)
-```
-
+~~~
 {: .language-r}
 
 If CRS is missing, `st_crs()` will return `NA`.
@@ -296,28 +287,26 @@ If CRS is missing, `st_crs()` will return `NA`.
 
 The example `glatos` coordinates are longitude/latitude in degrees, so assign **WGS84 (EPSG:4326)**:
 
-```
+~~~
 detections_sf  <- st_set_crs(detections_sf, 4326)
 deployments_sf <- st_set_crs(deployments_sf, 4326)
 
 st_crs(detections_sf)
 st_crs(deployments_sf)
-```
-
+~~~
 {: .language-r}
 
 ### Transform to a projected CRS (meters)
 
 Transform to a projected CRS for distance-based work. Here we use **UTM zone 20N (EPSG:32620)**:
 
-```
+~~~
 detections_utm  <- st_transform(detections_sf, 32620)
 deployments_utm <- st_transform(deployments_sf, 32620)
 
 st_crs(detections_utm)
 st_crs(deployments_utm)
-```
-
+~~~
 {: .language-r}
 
 ---
@@ -329,7 +318,7 @@ st_crs(deployments_utm)
 > 3. Transform both objects to EPSG:32620 with `st_transform()`.
 > 4. Plot the projected layers and confirm they still overlap.
 >
-> ```
+> ~~~
 > plot(st_geometry(deployments_utm),
 >      pch = 16, cex = 0.8, asp = 1,
 >      main = "Deployments and detections (UTM, meters)")
@@ -337,8 +326,7 @@ st_crs(deployments_utm)
 > plot(st_geometry(detections_utm),
 >      pch = 16, cex = 0.5,
 >      add = TRUE)
-> ```
->
+> ~~~
 > {: .language-r}
 >
 > > ## Solution
@@ -348,8 +336,8 @@ st_crs(deployments_utm)
 > > * EPSG:4326 is assigned to `detections_sf` and `deployments_sf`.
 > > * EPSG:32620 is shown for `detections_utm` and `deployments_utm`.
 > > * The projected plot shows the same spatial pattern as the geographic plot.
-> >   {: .solution}
-> >   {: .challenge}
+>{: .solution}
+{: .challenge}
 
 If you want a deeper overview of coordinate reference systems and projections, you can refer the following links: https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/ and https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs
 
@@ -381,45 +369,41 @@ This requires meter units, so it uses `deployments_utm` and `detections_utm`.
 
 #### Create 5 km buffers around receiver stations
 
-```
+~~~
 # 5 km = 5000 meters (requires projected CRS with meter units)
 receiver_buf_5km <- st_buffer(deployments_utm, dist = 5000)
-```
-
+~~~
 {: .language-r}
 
 #### Subset detections to one tag
 
-```
+~~~
 # Use one tag to keep results and plots manageable
 tag_id  <- detections_utm$tagName[1]
 one_tag <- detections_utm[detections_utm$tagName == tag_id, ]
-```
-
+~~~
 {: .language-r}
 
 #### Count detections inside any buffer
 
 `st_intersects()` returns which buffers each detection intersects. If a detection intersects at least one buffer, it is within 5 km of a receiver.
 
-```
+~~~
 inside_any <- lengths(st_intersects(one_tag, receiver_buf_5km)) > 0
 
 sum(inside_any)   # detections within 5 km of >= 1 receiver
 nrow(one_tag)     # total detections for this tag
-```
-
+~~~
 {: .language-r}
 
 #### Plot buffers and detections
 
-```
+~~~
 plot(st_geometry(receiver_buf_5km), col = NA, border = "grey40",
      main = "Detections within 5 km of receivers (UTM, one tag)")
 
 plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
-```
-
+~~~
 {: .language-r}
 
 ---
@@ -441,8 +425,8 @@ plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
 > > * `sum(inside_any)` returns a count between 0 and `nrow(one_tag)`.
 > > * The plot shows detection points overlaid on the receiver buffers.
 > > * This workflow uses the projected `*_utm` objects so the buffer distance is interpreted in meters.
-> >   {: .solution}
-> >   {: .challenge}
+> {: .solution}
+{: .challenge}
 
 ---
 
@@ -497,45 +481,41 @@ This example uses a depth (bathymetry) GeoTIFF. Download the bathymetry_raster.t
 
 #### Load the raster and check its spatial information
 
-```
+~~~
 depth_raster <- rast("data/bathymetry_raster.tiff")
 
 ext(depth_raster)  # area covered
 res(depth_raster)  # cell size
 crs(depth_raster)  # CRS
-```
-
+~~~
 {: .language-r}
 
 #### Subset detections to one tag
 
-```
+~~~
 tag_id  <- detections_sf$tagName[1]
 one_tag <- detections_sf[detections_sf$tagName == tag_id, ]
-```
-
+~~~
 {: .language-r}
 
 #### Match CRS (if needed) and extract values
 
-```
+~~~
 if (st_crs(one_tag)$wkt != crs(depth_raster)) {
   one_tag <- st_transform(one_tag, crs(depth_raster))
 }
 
 one_tag$depth_m <- extract(depth_raster, vect(one_tag))[, 2]
 head(one_tag[, c("tagName", "depth_m")])
-```
-
+~~~
 {: .language-r}
 
 #### Quick plot (optional)
 
-```
+~~~
 plot(depth_raster, main = "Depth raster + detections (one tag)")
 plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
-```
-
+~~~
 {: .language-r}
 
 > ## Raster extraction Challenge
@@ -551,8 +531,8 @@ plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
 > > ## Solution
 > >
 > > A correct result is that `one_tag$depth_m` contains numeric values (not all `NA`) and `head(one_tag[, c("tagName","depth_m")])` prints depth values for the first few detections.
-> > {: .solution}
-> > {: .challenge}
+>{: .solution}
+{: .challenge}
 
 
 ## Next steps
