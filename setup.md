@@ -92,29 +92,19 @@ install.packages('ggmap')
 install.packages('sp')
 install.packages('raster')
 
-# Install actel
-library(remotes)
-remotes::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
 
 # Install packages for building/displaying R Markdown
 install.packages('rmarkdown')
 install.packages('knitr', dependencies = TRUE)
 
-# Install additonal packages for `remora` lesson
+# Install additonal packages for geospatial lesson
 install.packages('readr')
 install.packages('sf')
 install.packages('stars')
+install.packages('terra')
 
-# Install remora
-install.packages('devtools')
-library(devtools)
-devtools::install_github('ocean-tracking-network/remora@workshop_ready', force=TRUE)
 
-# Install packages for animating detection data
-install.packages('remotes')
-library(remotes) 
-remotes::install_github("jmlondon/pathroutr")
-
+# Plotting and animation packages for if we get time
 install.packages('plotly')
 install.packages('gganimate')
 install.packages('ggspatial')
