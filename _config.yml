@@ -10,11 +10,11 @@
 carpentry: "swc"
 
 # Overall title for pages.
-title: "OTN's Telemetry Workshop Curriculum Base"
+title: "GLATOS Coding Workshops 2026 - Intro to R and Advanced R"
 
 # Life cycle stage of the lesson
 # possible values: "pre-alpha", "alpha", "beta", "stable"
-life_cycle: "beta"
+life_cycle: "stable"
 
 #------------------------------------------------------------
 # Generic settings (should not need to change).
