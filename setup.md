@@ -80,7 +80,6 @@ remotes::install_github('ocean-tracking-network/glatos')
 #Additional packages for mapping.
 install.packages('stringr')
 install.packages('mapview')
-install.packages('spdplyr')
 
 # Lubridate - part of Tidyverse, improves the process of creating date objects
 install.packages('lubridate')
