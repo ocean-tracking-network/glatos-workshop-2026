@@ -29,7 +29,7 @@ You will requre 1) all the correct programs, 2) all the listed R packages 3) the
 {: .callout}
 
 ### Please see the attached document for program instructions: - [Program Install Instructions.docx](/Resources/install_instructions.docx)
--  R version: 3.6.x or newer (recommend 4.0.x) and RStudio
+-  R version: 4.x or newer (recommend 4.5.x) and RStudio or Positron
 -  Rtools (Windows users only) and GDAL are only required for the Advanced Telemetry Workshop
 
 Once all of the programs are installed, open RStudio and run the below package install scripts. It's best to run it line by line instead of all at once in case there are errors.
@@ -68,11 +68,6 @@ install.packages("viridis")
 <b>Note:</b> When running through the installs, you may encounter a prompt asking you to upgrade dependent packages. Choosing Option `3: None`, works in most situations and will prevent upgrades of packages you weren't explicitly looking to upgrade.
 
 ```r
-
-# rgdal
-install.packages('rgdal')
-library(rgdal)
-rgdal::getGDALVersionInfo()
 
 # Tidyverse (data cleaning and arrangement)
 install.packages('tidyverse')
