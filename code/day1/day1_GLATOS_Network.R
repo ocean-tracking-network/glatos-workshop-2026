@@ -9,7 +9,7 @@ library(plotly)
 library(ggmap)
 ggmap::register_stadiamaps("b01d1235-69e8-49ea-b3bd-c35b42424b00")
 
-setwd('YOUR/PATH/TO/data/glatos') #set folder you're going to work in
+setwd('./data/glatos') #set folder you're going to work in
 getwd() #check working directory
 
 # Intro to R --------
@@ -91,14 +91,14 @@ heights[complete.cases(heights)] #select only complete cases
 
 #imports file into R. paste the filepath to the unzipped file here!
 
-lamprey_dets <- read_csv("inst_extdata_lamprey_detections.csv", guess_max = 3103) 
+lamprey_dets <- readr::read_csv("inst_extdata_lamprey_detections.csv", guess_max = 3103) 
 
 ## Exploring Detection Extracts ----
 
 head(lamprey_dets) #first 6 rows
 View(lamprey_dets) #can also click on object in Environment window
 str(lamprey_dets) #can see the type of each column (vector)
-glimpse(lamprey_dets) #similar to str()
+glimpse(lamprey_dets) #similar to str(), provided by tidyverse
 
 #summary() is a base R function that will spit out some quick stats about a vector (column)
 #the $ syntax is the way base R selects columns from a data frame
