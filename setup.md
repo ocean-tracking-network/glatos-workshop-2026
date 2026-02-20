@@ -30,7 +30,7 @@ You will requre 1) all the correct programs, 2) all the listed R packages 3) the
 
 ### Please see the attached document for program instructions: - [Program Install Instructions.docx](/Resources/install_instructions.docx)
 -  R version: 4.x or newer (recommend 4.5.x) and RStudio (or optionally Positron)
--  Rtools (Windows users only) and GDAL are only required for the Advanced Telemetry Workshop
+-  Rtools (Windows users only)
 
 Once all of the programs are installed, open RStudio and run the below package install scripts. It's best to run it line by line instead of all at once in case there are errors.
 
