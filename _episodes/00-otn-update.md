@@ -34,10 +34,7 @@ OTN-affiliated telemetry networks all provide researchers with pre-formatted dat
 
 Before diving in to a lot of analysis, it is important to take the time to clean and sort your dataset, taking the pre-formatted files and combining them in different ways, allowing you to analyse the data with different questions in mind.
 
-There are multiple R packages necessary for efficient and thorough telemetry data analysis.  General packages that allow for data cleaning and arrangement, dataset manipulation and visualization, pairing with oceanographic data and temporo-spatial locating are used in conjuction with the telemetry analysis tool packages `remora`, `actel` and `glatos`. 
-
-There are many more useful packages covered in this workshop, but here are some highlights:
-
+There are multiple R packages necessary for efficient and thorough telemetry data analysis.  General packages that allow for data cleaning and arrangement, dataset manipulation and visualization, pairing with oceanographic data and temporo-spatial locating are used in conjuction with the telemetry analysis tool packages `remora`, `actel` and `glatos`. Today we will be introducing the glatos package.
 
 ####  Intro to the `glatos` Package
 
@@ -45,6 +42,15 @@ There are many more useful packages covered in this workshop, but here are some 
 
 Maintainer: Dr. Chris Holbrook, ( cholbrook@usgs.gov )
 
+#### Intro to Geospatial Data in R
+
+
+This lesson introduces the basic concepts and practical workflow for working with geospatial data in R, using telemetry-style data as the running example. The intent is to cover both the definitions (what spatial data is, what a CRS is) and the minimum set of operations you need to correctly map and analyze locations.
+
+Maintainer: Dheemanth Rajendra Prasad Kumawat ( @dheemanthrk on GitHub, dkumawat@oceantrack.org )
+
+
+There are many more useful packages that will not covered in this workshop that OTN has established curriculum for. Here are some examples:
 
 ####  Intro to the `actel` Package
 
@@ -72,3 +78,11 @@ Maintainer: Created by a team from [IMOS Animal Tracking Facility](https://imos.
 The goal of `pathroutr` is to provide functions for re-routing paths that cross land around barrier polygons. The use-case in mind is movement paths derived from location estimates of marine animals. Due to error associated with these locations it is not uncommon for these tracks to cross land. The `pathroutr` package aims to provide a pragmatic and fast solution for re-routing these paths around land and along an efficient path. You can learn more [here](https://github.com/jmlondon/pathroutr)
 
 Author: Dr. Josh M London ( josh.london@noaa.gov )
+
+#### Spatial and temporal modelling with GAMs
+
+Generalized additive models are a type of statistical model for explaining variance in a dataset. In this lesson, we use GAMs to analyze telemetry data and develop and visualize models of potential relationships between variables.
+
+#### Accessing OTN Data
+
+A series of workshop modules on downloading and exploring OTN's public data products and project datasets.
