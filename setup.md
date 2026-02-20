@@ -19,7 +19,7 @@ You will requre 1) all the correct programs, 2) all the listed R packages 3) the
 > - I have run the setup script from this page, and installed all relevant packages
 > 
 > **Files & Resources**
-> - I have downloaded the correct data files and scripts from the official source. Note: for this workshop, the official source is [here](LINK TO REPOSITORY)
+> - I have downloaded the correct data files and scripts from the official source. Note: for this workshop, the official source is [here](https://github.com/ocean-tracking-network/glatos-workshop-2026)
 > - The downloaded files are unzipped and saved in my RStudio instance's current working directory. Note: You can use `getwd()` in the RStudio console to check your current working directory and make sure your files are there. 
 >
 > (NOTE FOR SITE DEVELOPERS: If appropriate, include a note in the list below for where Wi-Fi credentials can be found.)
@@ -29,7 +29,7 @@ You will requre 1) all the correct programs, 2) all the listed R packages 3) the
 {: .callout}
 
 ### Please see the attached document for program instructions: - [Program Install Instructions.docx](/Resources/install_instructions.docx)
--  R version: 4.x or newer (recommend 4.5.x) and RStudio or Positron
+-  R version: 4.x or newer (recommend 4.5.x) and RStudio (or optionally Positron)
 -  Rtools (Windows users only) and GDAL are only required for the Advanced Telemetry Workshop
 
 Once all of the programs are installed, open RStudio and run the below package install scripts. It's best to run it line by line instead of all at once in case there are errors.
