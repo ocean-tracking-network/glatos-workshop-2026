@@ -1,8 +1,8 @@
-# 07 - Introduction to glatos ####
+# 08 - Introduction to glatos ####
 
 ## Set your working directory
 
-setwd("YOUR/PATH/TO/data/glatos/")
+setwd("./data/glatos/")
 library(glatos)
 library(tidyverse)
 library(lubridate)
@@ -15,7 +15,7 @@ det_file_name <- system.file("extdata", "walleye_detections.csv",
 
 
 ## glatos help files are helpful!!
-?read_otn_deployments
+?read_glatos_receivers
 
 # Save our detections file data into a dataframe called detections
 detections <- read_glatos_detections(det_file=det_file_name)
@@ -39,18 +39,18 @@ detections_filtered <- detections_filtered[detections_filtered$passed_filter == 
 nrow(detections_filtered) # Smaller than before
 
 
-# Summarize Detections ####
+## Summarize Detections ####
 # ?summarize_detections
 # summarize_detections(detections_filtered)
 
-# By animal ====
+### By animal ====
 
 sum_animal <- summarize_detections(detections_filtered, location_col = 'station', summ_type='animal')
 
 sum_animal
 
 
-# By location ====
+### By location ====
 
 sum_location <- summarize_detections(detections_filtered, location_col = 'station', summ_type='location')
 
@@ -69,7 +69,7 @@ sum_location_special <- summarize_detections(detections_filtered_special, locati
 head(sum_location_special)
 
 
-# By both dimensions
+### By both dimensions ####
 sum_animal_location <- summarize_detections(det = detections_filtered,
                                             location_col = 'station',
                                             summ_type='both')
@@ -95,7 +95,7 @@ sum_animal_custom <- summarize_detections(det=detections_filtered,
 sum_animal_custom
 
 
-# Reduce Detections to Detection Events ####
+## Reduce Detections to Detection Events ####
 
 # ?glatos::detection_events
 # arrival and departure time instead of multiple detection rows
@@ -113,7 +113,9 @@ detections_w_events <- detection_events(detections_filtered,
                                         location_col = 'station',
                                         time_sep=3600, condense=FALSE)
 
-# 08 - More Features of glatos ####
+
+
+# 09 - More Features of glatos ####
 
 
 ?residence_index
@@ -125,12 +127,13 @@ subset_animals <- c('22', '153')
 events_subset <- events %>% filter(animal_id %in% subset_animals)
 
 events_subset
-# Calc residence index using the Kessel method
+
+## RI using the Kessel method ####
 rik_data <- residence_index(events_subset,
                             calculation_method = 'kessel')
 rik_data
 
-# Calc residence index using the time interval method, interval set to 6 hours
+## RI time interval method, interval set to 6 hours ####
 # "Kessel" method is a special case of "time_interval" where time_interval_size = "1 day"
 
 rit_data <- residence_index(events_subset,
@@ -140,9 +143,11 @@ rit_data
 
 # BREAK
 
-# 9 - Basic Visualization and Plotting
 
-# Visualizing Data - Abacus Plots ####
+# 10 - Basic Visualization and Plotting ####
+
+
+## Visualizing Data - Abacus Plots ####
 # ?glatos::abacus_plot
 # customizable version of the standard VUE-derived abacus plots
 
@@ -155,7 +160,7 @@ abacus_plot(detections_filtered[detections_filtered$animal_id== "22",],
             location_col='station',
             main="Animal 22 Detections By Station")
 
-# Bubble Plots for Spatial Distribution of Fish ####
+## Bubble Plots for Spatial Distribution of Fish ####
 # bubble variable gets the summary data that was created to make the plot
 detections_filtered
 
@@ -170,7 +175,7 @@ bubble_array <- detection_bubble_plot(detections_filtered,
                                       out_file = 'walleye_bubbles_by_array.png')
 bubble_array
 
-# Challenge 1 ----
+## Challenge 1 ----
 # Create a bubble plot of the area on which we zoomed in earlier. Set the bounding box using the provided nw + se cordinates, change the colour scale and
 # resize the points to be smaller. As a bonus, add points for the other receivers that don't have any detections.
 # Hint: ?detection_bubble_plot will help a lot
@@ -179,3 +184,141 @@ bubble_array
 erie_arrays <- c('DRF', 'DRL', 'DRU', 'MAU', 'RAR', 'SCL', 'SCM', 'TSR') #given
 nw <- c(43, -83.75) #given
 se <- c(41.25, -82) #given
+
+
+
+# 11 - Geospatial Data in R ####
+
+library(sf)
+library(terra)
+library(glatos)
+
+
+## setup data frames - using the OTN style data frames
+det_csv <- system.file("extdata", "blue_shark_detections.csv", package = "glatos")
+dep_csv <- system.file("extdata", "hfx_deployments.csv",      package = "glatos")
+
+detections  <- read.csv(det_csv)
+deployments <- read.csv(dep_csv)
+
+
+names(detections)
+names(deployments)
+
+## Detections as sf points ####
+detections_sf <- st_as_sf(
+  detections,
+  coords = c("decimalLongitude", "decimalLatitude"),
+  remove = FALSE
+)
+
+## Deployments (receiver stations) as sf points ####
+deployments_sf <- st_as_sf(
+  deployments,
+  coords = c("stn_long", "stn_lat"),
+  remove = FALSE
+)
+
+## Check the result ####
+class(detections_sf)
+class(deployments_sf)
+
+st_geometry(detections_sf)[1:3]
+st_geometry(deployments_sf)[1:3]
+
+## Plot the data frames ####
+plot(st_geometry(deployments_sf),
+     pch = 16, cex = 0.8, asp = 1,
+     main = "Receiver deployments and detections")
+
+plot(st_geometry(detections_sf),
+     pch = 16, cex = 0.5,
+     add = TRUE)
+
+
+# Coordinate Reference Systems (CRS) in R ####
+
+## Check the CRS of our data frames  ####
+st_crs(detections_sf)
+st_crs(deployments_sf)
+
+## Assign a CRS to the detection data frames ####
+detections_sf  <- st_set_crs(detections_sf, 4326)
+deployments_sf <- st_set_crs(deployments_sf, 4326)
+
+st_crs(detections_sf)
+st_crs(deployments_sf)
+
+## Transform (project) the dataframes to a new CRS ####
+
+detections_utm  <- st_transform(detections_sf, 32620)
+deployments_utm <- st_transform(deployments_sf, 32620)
+
+st_crs(detections_utm)
+st_crs(deployments_utm)
+
+
+## Plot the result ####
+plot(st_geometry(deployments_utm),
+     pch = 16, cex = 0.8, asp = 1,
+     main = "Deployments and detections (UTM, meters)")
+
+plot(st_geometry(detections_utm),
+     pch = 16, cex = 0.5,
+     add = TRUE)
+
+# When CRS choice matters ####
+
+## Preserving distance / distance-related questions ####
+# 5 km = 5000 meters (requires projected CRS with meter units)
+receiver_buf_5km <- st_buffer(deployments_utm, dist = 5000)
+
+
+### Subset to one tag ####
+tag_id  <- detections_utm$tagName[1]
+one_tag <- detections_utm[detections_utm$tagName == tag_id, ]
+
+
+### Count detections within a buffer object ####
+inside_any <- lengths(st_intersects(one_tag, receiver_buf_5km)) > 0
+
+sum(inside_any)   # detections within 5 km of >= 1 receiver
+nrow(one_tag)     # total detections for this tag
+
+### Visualize the buffer and data ####
+plot(st_geometry(receiver_buf_5km), col = NA, border = "grey40",
+     main = "Detections within 5 km of receivers (UTM, one tag)")
+
+plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
+
+
+# Raster data and `terra` #### 
+
+
+## Import a raster file of bathymetry ####
+depth_raster <- rast("data/bathymetry_raster.tiff")
+
+ext(depth_raster)  # area covered
+res(depth_raster)  # cell size
+crs(depth_raster)  # CRS
+
+# Single-tag 
+tag_id  <- detections_sf$tagName[1]
+one_tag <- detections_sf[detections_sf$tagName == tag_id, ]
+
+
+## Check and match CRS between raster and point dataframe ####
+if (st_crs(one_tag)$wkt != crs(depth_raster)) {
+  one_tag <- st_transform(one_tag, crs(depth_raster))
+}
+
+one_tag$depth_m <- extract(depth_raster, vect(one_tag))[, 2]
+head(one_tag[, c("tagName", "depth_m")])
+
+## Plot together
+
+plot(depth_raster, main = "Depth raster + detections (one tag)")
+plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
+
+
+## Challenge - raster extraction
