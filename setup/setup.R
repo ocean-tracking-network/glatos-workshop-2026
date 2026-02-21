@@ -38,13 +38,6 @@ install.packages("viridis")
 
 
 
-
-## Advanced Telemetry Workshop Requirements ----
-# rgdal
-install.packages('rgdal')
-library(rgdal)
-rgdal::getGDALVersionInfo()
-
 # Tidyverse (data cleaning and arrangement)
 install.packages('tidyverse')
 
@@ -56,7 +49,6 @@ remotes::install_github('ocean-tracking-network/glatos')
 #Additional packages for mapping.
 install.packages('stringr')
 install.packages('mapview')
-install.packages('spdplyr')
 install.packages('geodata')
 
 # Lubridate - part of Tidyverse, improves the process of creating date objects
