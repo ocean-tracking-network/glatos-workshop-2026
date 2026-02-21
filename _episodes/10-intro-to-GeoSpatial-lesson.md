@@ -510,6 +510,51 @@ head(one_tag[, c("tagName", "depth_m")])
 ~~~
 {: .language-r}
 
+
+#### Use bathymetry raster data to color water and land cells for plotting
+
+Side problem - How to make a plot that visualizes the land-water barrier? The water would need a range of blue colors, the land a different colorset
+
+We can use terra to tell us the range of values and set some bins for different color palettes, break the range of depths in our bathy file into above and below water, and color each section appropriately.
+~~~
+
+
+# First: Calculate min and max values for our bathymetry raster
+minmax = terra::minmax(depth_raster, compute=TRUE)
+
+mi = minmax[1]
+ma = minmax[2]
+
+# What is considered 'sea level' where we are going to be computing?
+water_line=0  # this will depend on your bathy dataset values more than the real-world values!
+
+# Break points sequence for below waterline
+s1 <- seq(from=mi, to=water_line, by=water_line - mi / 50)
+# Break points sequence for above waterline
+s2 <- seq(from=water_line, to=ma, by=ma / 10)
+
+# Round sequence to nearest 100
+s1 <- round(s1, -2)
+s2 <- round(s2, -2)
+
+# Only keep unique numbers
+s1 <- unique(s1)
+s2 <- unique(s2)
+
+# Combine sequences and remove the first value from second sequence
+# This is so that only the first sequence has the 'water line' value.
+s3 <- c(s1, s2[-1])
+
+## Set up the palette of blues for our water colors.
+blue.col <- colorRampPalette(c("darkblue", "lightblue"))
+
+## plot the raster but don't show the depth bins on the legend.
+plot(depth_raster, main = "Depth raster with colorscale", 
+        col=c(blue.col(50), terrain.colors(10)), breaks=s3, legend=FALSE)
+~~~
+{: .language-r}
+
+
 #### Quick plot (optional)
 
 ~~~
