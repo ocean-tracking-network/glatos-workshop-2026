@@ -513,7 +513,7 @@ head(one_tag[, c("tagName", "depth_m")])
 
 #### Use bathymetry raster data to color water and land cells for plotting
 
-Side problem - How to make a plot that visualizes the land-water barrier? The water would need a range of blue colors, the land a different colorset
+Side problem - How to make a plot that visualizes the land-water barrier? The water would need a range of blue colors, the land a different colorset. terrain.colors
 
 We can use terra to tell us the range of values and set some bins for different color palettes, break the range of depths in our bathy file into above and below water, and color each section appropriately.
 ~~~
@@ -526,7 +526,7 @@ mi = minmax[1]
 ma = minmax[2]
 
 # What is considered 'sea level' where we are going to be computing?
-water_line=0  # this will depend on your bathy dataset values more than the real-world values!
+water_line=0  # this will depend on your bathymetry dataset values more than the real-world values!
 
 # Break points sequence for below waterline
 s1 <- seq(from=mi, to=water_line, by=water_line - mi / 50)
@@ -582,6 +582,6 @@ plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
 
 ## Next steps
 
-This lesson introduced the core workflow for working with geospatial data in R. You converted telemetry tables into spatial objects with `sf`, used CRS metadata to correctly align layers and support measurement-based operations, and ran a simple distance-based example using buffers. You also introduced raster data with `terra` by loading a gridded depth layer and extracting values at detection locations.
+This lesson introduced the core workflow for working with geospatial data in R. We converted telemetry tables into spatial objects with `sf`, used CRS metadata to correctly align layers and support measurement-based operations, and ran a simple distance-based example using buffers. We also introduced raster data with `terra` by loading a gridded depth layer and extracting values at detection locations.
 
 From here, the same steps can be applied to common tasks such as nearest-receiver summaries, points-in-polygons queries, creating simple tracks from time-ordered detections, and extracting additional environmental layers (for example, temperature or chlorophyll) once an appropriate raster product and time slice are selected.
