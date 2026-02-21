@@ -526,12 +526,14 @@ mi = minmax[1]
 ma = minmax[2]
 
 # What is considered 'sea level' where we are going to be computing?
-water_line=0  # this will depend on your bathymetry dataset values more than the real-world values!
+water_line=0  # this will depend on your bathy dataset's units
+              # and the calculated breakpoint values more than 
+              # the real-world values!
 
 # Break points sequence for below waterline
-s1 <- seq(from=mi, to=water_line, by=water_line - mi / 50)
+s1 <- seq(from=mi, to=water_line, by= -(mi-water_line) / 50)
 # Break points sequence for above waterline
-s2 <- seq(from=water_line, to=ma, by=ma / 10)
+s2 <- seq(from=water_line, to=ma, by=(ma-water_line) / 10)
 
 # Round sequence to nearest 100
 s1 <- round(s1, -2)
@@ -547,6 +549,7 @@ s3 <- c(s1, s2[-1])
 
 ## Set up the palette of blues for our water colors.
 blue.col <- colorRampPalette(c("darkblue", "lightblue"))
+
 
 ## plot the raster but don't show the depth bins on the legend.
 plot(depth_raster, main = "Depth raster with colorscale", 
