@@ -65,39 +65,29 @@ install.packages('lubridate')
 # GGmap - complimentary to ggplot2, which is in the Tidyverse
 install.packages('ggmap')
 
-#SP and Raster packages for mapping.
-install.packages('sp')
-install.packages('raster')
-
-# Install actel
-library(remotes)
-remotes::install_github("hugomflavio/actel", 
-                        build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
 
 # Install packages for building/displaying R Markdown
 install.packages('rmarkdown')
 install.packages('knitr', dependencies = TRUE)
+                      
 
-# Install additonal packages for `remora` lesson
+# Install additional packages for geospatial lesson
 install.packages('readr')
 install.packages('sf')
 install.packages('stars')
-
-# Install remora
-install.packages('devtools')
-library(devtools)
-devtools::install_github('ocean-tracking-network/remora@workshop_ready', force=TRUE)
-
+install.packages('terra')
+                                                            
 # Install packages for animating detection data
 install.packages('remotes')
 library(remotes) 
 remotes::install_github("jmlondon/pathroutr")
 
+
+# Bonus content packages
 install.packages('plotly')
 install.packages('gganimate')
 install.packages('ggspatial')
-                                                            
-                                                            
+
 
 ### Dataset and Code -----
 # Once the packages are installed, you can download the datasets and code for this workshop from https://github.com/ocean-tracking-network/otn-workshop-base/tree/master.
