@@ -70,13 +70,10 @@ install.packages('stars')
 install.packages('terra')
                                                             
 # Install packages for animating detection data
-install.packages('remotes')
-library(remotes) 
 remotes::install_github("jmlondon/pathroutr")
 
 
 # Bonus content packages
-install.packages('plotly')
 install.packages('gganimate')
 install.packages('ggspatial')
 
