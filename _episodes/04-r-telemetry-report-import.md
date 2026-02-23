@@ -7,9 +7,6 @@ questions:
     - "How do I import all the datasets?"
 ---
 
-**NOTE:** this workshop has been update to align with OTN's 2025 Detection Extract Format. For older detection extracts, please see the this lesson: [Archived OTN Workshop](https://ocean-tracking-network.github.io/otn-workshop-2025-06/). 
-
-## GLATOS Network
 
 ### Importing all the datasets
 Now that we have an idea of what an exploratory workflow might look like with Tidyverse libraries like `dplyr` and `ggplot2`, let's look at how we might implement a common telemetry workflow using these tools. 
@@ -56,14 +53,14 @@ View(walleye_recovery)
 
 walleye_recovery <- walleye_recovery %>% rename(INS_SERIAL_NO = INS_SERIAL_NUMBER) #first, rename INS_SERIAL_NUMBER so they match between the two dataframes.
 
-walleye_recievers <- merge(walleye_deploy, walleye_recovery,
+walleye_receivers <- merge(walleye_deploy, walleye_recovery,
                           by.x = c("GLATOS_PROJECT", "GLATOS_ARRAY", "STATION_NO",
                                     "CONSECUTIVE_DEPLOY_NO", "INS_SERIAL_NO"), 
                           by.y = c("GLATOS_PROJECT", "GLATOS_ARRAY", "STATION_NO", 
                                     "CONSECUTIVE_DEPLOY_NO", "INS_SERIAL_NO"), 
                           all.x=TRUE, all.y=TRUE) #keep all the info from each, merged using the above columns
 
-View(walleye_recievers)
+View(walleye_receivers)
 
 # Tagging metadata
 
@@ -80,7 +77,7 @@ View(walleye_tag)
 The `glatos` R package (which will be introduced in future lessons) can import your Workbook in one step! The function will format all datetimes to UTC, check for conflicts, join the deploy/recovery tabs etc. This package is beyond the scope of this lesson, but is incredibly useful for GLATOS Network members. Below is some example code:
 
 ~~~
-# this won't work unless you happen to have this installed - just an teaser today, will be covered tomorrow
+# Import the Network-authored glatos package
 library(glatos) 
 data <- read_glatos_workbook('inst_extdata_walleye_workbook.xlsm')
 receivers <- data$receivers
