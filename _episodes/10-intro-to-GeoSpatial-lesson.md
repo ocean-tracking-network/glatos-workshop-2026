@@ -30,45 +30,11 @@ By the end of the lesson, participants will have taken telemetry-style detection
 
 ## Setup
 
-This lesson uses **R**. Open RStudio and work from an R script (File → New File → R Script) so your code is saved.
-
 We will use:
 
 * `sf` for vector spatial data (points, lines, polygons)
 * `terra` for raster spatial data (grids)
 * `glatos` for telemetry-oriented workflows and example data structures
-
-### Install packages
-
-Install `sf` and `terra` from CRAN:
-
-~~~
-install.packages(c("sf", "terra"))
-~~~
-{: .language-r}
-
-Install `glatos` from the OTN R-universe repository:
-
-~~~
-options(repos = c(
-  otn  = "https://ocean-tracking-network.r-universe.dev",
-  CRAN = "https://cloud.r-project.org"
-))
-
-install.packages("glatos")
-~~~
-{: .language-r}
-
-If you have trouble installing `glatos`, you can refer the instructions here: https://github.com/ocean-tracking-network/glatos
-
-### Load packages
-
-~~~
-library(sf)
-library(terra)
-library(glatos)
-~~~
-{: .language-r}
 
 ### Verify the setup
 
@@ -339,7 +305,7 @@ st_crs(deployments_utm)
 >{: .solution}
 {: .challenge}
 
-If you want a deeper overview of coordinate reference systems and projections, you can refer the following links: [https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/](https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/) and https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs
+If you want a deeper overview of coordinate reference systems and projections, you can refer the following links: [https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/](https://earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/) and [https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs](https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs)
 
 ## When CRS choice matters (distance vs area vs angles)
 
@@ -460,8 +426,8 @@ Three properties determine how a raster lines up with other spatial data and how
 * **Resolution (cell size)**: the size of each cell. Smaller cells give more spatial detail but increase file size and computation time.
 * **CRS**: how the raster grid is positioned on Earth.
 
-If you want a deeper overview of raster concepts and raster properties (extent, resolution, CRS, bands, NoData), see the ArcGIS Pro documentation: https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/introduction-to-raster-data.htm
- and https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/raster-dataset-properties.htm
+If you want a deeper overview of raster concepts and raster properties (extent, resolution, CRS, bands, NoData), see the ArcGIS Pro documentation: [https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/introduction-to-raster-data.htm](https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/introduction-to-raster-data.htm)
+ and [https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/raster-dataset-properties.htm](https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/raster-dataset-properties.htm)
 
 ### The key raster–point operation: extraction
 
