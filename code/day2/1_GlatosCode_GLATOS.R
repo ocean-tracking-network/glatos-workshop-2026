@@ -17,6 +17,15 @@ det_file_name <- system.file("extdata", "walleye_detections.csv",
 ## glatos help files are helpful!!
 ?read_glatos_receivers
 
+# Do you need all 32k historic glatos receiver locations? 
+# Download them from the GLATOS data portal at glatos.org 
+# and you can read them in with read_glatos_receivers.
+
+all_receivers_ever <- read_glatos_receivers('GLATOS_receiverLocations_20260217_204107.csv')
+
+plot(all_receivers_ever)
+
+
 # Save our detections file data into a dataframe called detections
 detections <- read_glatos_detections(det_file=det_file_name)
 
@@ -270,8 +279,10 @@ plot(st_geometry(detections_utm),
 # When CRS choice matters ####
 
 ## Preserving distance / distance-related questions ####
-# 5 km = 5000 meters (requires projected CRS with meter units)
-receiver_buf_5km <- st_buffer(deployments_utm, dist = 5000)
+# 1 km = 1000 meters (requires projected CRS with meter units)
+# upper bound of a detection range for high-power tags
+
+receiver_buf_1km <- st_buffer(deployments_utm, dist = 1000)
 
 
 ### Subset to one tag ####
@@ -280,19 +291,44 @@ one_tag <- detections_utm[detections_utm$tagName == tag_id, ]
 
 
 ### Count detections within a buffer object ####
-inside_any <- lengths(st_intersects(one_tag, receiver_buf_5km)) > 0
+inside_any <- lengths(st_intersects(one_tag, receiver_buf_1km)) > 0
 
-sum(inside_any)   # detections within 5 km of >= 1 receiver
+sum(inside_any)   # detections within 1 km of >= 1 receiver
 nrow(one_tag)     # total detections for this tag
 
 ### Visualize the buffer and data ####
-terra::plot(st_geometry(receiver_buf_5km), col = NA, border = "grey40", alpha=0.2,
-     main = "Detections within 5 km of receivers (UTM, one tag)")
+terra::plot(st_geometry(receiver_buf_1km), col = NA, border = "grey40", alpha=0.2,
+     main = "Detections with 1 km detection range of receivers (UTM, one tag)")
 
-plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
+plot(st_transform(st_geometry(one_tag), 32620), pch = 16, cex = 0.6, add=TRUE)
+
+### Alternately - can we just use the stadiamap tiles from yesterday?
+# With ggmap, we can, in the ggplot2 style!
+
+# boundaries are the one-tag bounds
+base <- get_stadiamap(
+  bbox = c(left = min(one_tag$decimalLongitude),
+           bottom = min(one_tag$decimalLatitude), 
+           right = max(one_tag$decimalLongitude), 
+           top = max(one_tag$decimalLatitude)),
+  maptype = "stamen_terrain_background", 
+  crop = FALSE,
+  zoom = 8)
+
+## Set up two geometry objects for vis, the range of the receivers
+## and the one_tag detections
+
+receivers_w_basemap <- ggmap(base, extent="panel") + 
+  ## st_union will combine the individual detection buffers
+  geom_sf(data=sf::st_union(receiver_buf_1km), mapping=aes(), alpha=0.3, fill='grey30', color='black', linewidth=1, inherit.aes=F) +
+  geom_sf(data=one_tag, mapping=aes(), color='red', size=2, inherit.aes=F) +
+  coord_sf(crs = st_crs(4326))
+
+## Just like yesterday, but with some polygons!
+receivers_w_basemap
+
 
 # Raster data and `terra` #### 
-
 
 ## Import a raster file of bathymetry ####
 depth_raster <- rast("bathymetry_raster.tiff")

@@ -231,14 +231,14 @@ View(walleye_recovery)
 
 walleye_recovery <- walleye_recovery %>% rename(INS_SERIAL_NO = INS_SERIAL_NUMBER) #first, rename INS_SERIAL_NUMBER so they match between the two dataframes.
 
-walleye_recievers <- merge(walleye_deploy, walleye_recovery,
+walleye_receivers <- merge(walleye_deploy, walleye_recovery,
                            by.x = c("GLATOS_PROJECT", "GLATOS_ARRAY", "STATION_NO",
                                     "CONSECUTIVE_DEPLOY_NO", "INS_SERIAL_NO"), 
                            by.y = c("GLATOS_PROJECT", "GLATOS_ARRAY", "STATION_NO", 
                                     "CONSECUTIVE_DEPLOY_NO", "INS_SERIAL_NO"), 
                            all.x=TRUE, all.y=TRUE) #keep all the info from each, merged using the above columns
 
-View(walleye_recievers)
+View(walleye_receivers)
 
 # Tagging metadata
 
@@ -276,8 +276,8 @@ base <- get_stadiamap(
 #filter for stations you want to plot - this is very customizable
 
 glatos_deploy_plot <- glatos_receivers %>% 
-  mutate(deploy_date=ymd_hms(deploy_date_time)) %>% #make a datetime
-  mutate(recover_date=ymd_hms(recover_date_time)) %>% #make a datetime
+  mutate(deploy_date=ymd_hms(deploy_date_time)) %>% #make deploy datetime into a datetime
+  mutate(recover_date=ymd_hms(recover_date_time)) %>% #make recover datetime into a datetime
   filter(!is.na(deploy_date)) %>% #no null deploys
   filter(deploy_date > '2011-07-03' & recover_date < '2018-12-11') %>% #only looking at certain deployments, can add start/end dates here
   group_by(station, glatos_array) %>% 
@@ -297,8 +297,8 @@ glatos_map <-
   xlab("Longitude") +
   geom_point(data = glatos_deploy_plot, #filtering for recent deployments
              aes(x = MeanLong,y = MeanLat, colour = glatos_array), #specify the data
-             shape = 19, size = 2) #lots of aesthetic options here!
-
+             shape = 19, size = 2, show.legend='none') #lots of aesthetic options here!
+  
 #view your receiver map!
 
 glatos_map
@@ -307,6 +307,42 @@ glatos_map
 
 ggsave(plot = glatos_map, filename = "glatos_map.tiff", units="in", width=15, height=8) 
 #can specify location, file type and dimensions
+
+## Bonus - grab the latest (big!) deployments file from the glatos website and use it as your source!
+# glatos.org -> click Data Portal, then login. 
+# Click Network Status on the lefthand bar, 
+# then download the Receiver Locations file
+
+all_glatos_receivers <- read_csv("GLATOS_receiverLocations_20260217_204107.csv")
+
+# Same code as before, but grab newer receivers!
+
+all_base <- get_stadiamap(
+  bbox = c(left = min(all_glatos_receivers$deploy_long), 
+           bottom = min(all_glatos_receivers$deploy_lat), 
+           right = max(all_glatos_receivers$deploy_long), 
+           top = max(all_glatos_receivers$deploy_lat)),
+  maptype = "stamen_terrain_background", 
+  crop = FALSE,
+  zoom = 8)
+
+all_glatos_deploy_plot <- all_glatos_receivers %>% 
+  mutate(deploy_date=ymd_hms(deploy_date_time)) %>% #make deploy datetime into a datetime
+  mutate(recover_date=ymd_hms(recover_date_time)) %>% #make recover datetime into a datetime
+  filter(!is.na(deploy_date)) %>% #no null deploys
+  filter(deploy_date > '2022-07-03' & recover_date < '2026-03-01') %>% #only looking at certain deployments, can add start/end dates here
+  group_by(station, glatos_array) %>% 
+  summarise(MeanLat=mean(deploy_lat), MeanLong=mean(deploy_long)) 
+
+modern_glatos_map <- 
+  ggmap(all_base, extent='panel') + 
+  ylab("Latitude") +
+  xlab("Longitude") +
+  geom_point(data = all_glatos_deploy_plot, #filtering for recent deployments
+             aes(x = MeanLong,y = MeanLat, colour = glatos_array), #specify the data
+             shape = 19, size = 2) + theme(legend.position="none") #lots of aesthetic options here!
+
+modern_glatos_map
 
 ## Array Map - Static ----
 base <- get_stadiamap(
@@ -415,6 +451,28 @@ stationsum <- all_dets %>%
             det_days=length(unique(as.Date(detection_timestamp_utc))))
 View(stationsum)
 
+### If you need or prefer a slippy-map instead of a vector based map, try the following:
+
+fig <- glatos_deploy_plot %>%
+  plot_ly(
+    lat = ~MeanLat,
+    lon = ~MeanLong,
+    type = "scattermapbox",
+    hovertext = ~glatos_array,
+    marker = list(color = "fuchsia")) 
+fig <- fig %>%
+  layout(mapbox= list(
+    style = "white-bg",
+    zoom = 3,
+    center = list(lon = -93 ,lat= 41),
+    layers = list(list(
+      below = 'traces',
+      sourcetype = "raster",
+      source = list("https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}")))))
+
+fig
+
+
 
 # Creating Summary Reports: Taggers --------
 
@@ -445,6 +503,7 @@ detections_map
 #set your basemap
 
 geo_styling <- list(
+  #scope = 'north america',
   fitbounds = "locations", visible = TRUE, #fits the bounds to your data!
   showland = TRUE,
   showlakes = TRUE,
@@ -476,6 +535,9 @@ detections_map_plotly <- detections_map_plotly %>% layout(
 #View map
 
 detections_map_plotly
+
+# This map's even slower to render and change - it's too many detections at the same place.
+# Summaries might be a better way to express a set of values per location.
 
 ## Summary of Tagged Animals ----
 # summary of animals you've tagged
