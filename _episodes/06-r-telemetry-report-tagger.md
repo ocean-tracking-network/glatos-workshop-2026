@@ -7,8 +7,6 @@ questions:
     - "How do I summarize and plot my tag metadata?"
 ---
 
-**NOTE:** this workshop has been update to align with OTN's 2025 Detection Extract Format. For older detection extracts, please see the this lesson: [Archived OTN Workshop](https://ocean-tracking-network.github.io/otn-workshop-2025-06/). 
-
 ### Mapping my Detections and Releases - static map
 
 Where were my fish observed? We will make a static map of all the receiver stations where my fish was detected in two steps, using the package `ggmap`.
