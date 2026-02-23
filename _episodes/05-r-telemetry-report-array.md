@@ -7,10 +7,6 @@ questions:
     - "How do I summarize and plot my detections?"
 ---
 
-**NOTE:** this workshop has been update to align with OTN's 2025 Detection Extract Format. For older detection extracts, please see the this lesson: [Archived OTN Workshop](https://ocean-tracking-network.github.io/otn-workshop-2025-06/). 
-
-
-## GLATOS Network
 
 ### Mapping GLATOS stations - Static map
 
@@ -39,12 +35,13 @@ base <- get_stadiamap(
 #filter for stations you want to plot - this is very customizable
 
 glatos_deploy_plot <- glatos_receivers %>% 
-  dplyr::mutate(deploy_date=ymd_hms(deploy_date_time)) %>% #make a datetime
-  dplyr::mutate(recover_date=ymd_hms(recover_date_time)) %>% #make a datetime
+  dplyr::mutate(deploy_date=ymd_hms(deploy_date_time)) %>% #make deploy datetime into a datetime
+  dplyr::mutate(recover_date=ymd_hms(recover_date_time)) %>% #make recover datetime into a datetime
   dplyr::filter(!is.na(deploy_date)) %>% #no null deploys
   dplyr::filter(deploy_date > '2011-07-03' & recover_date < '2018-12-11') %>% #only looking at certain deployments, can add start/end dates here
   dplyr::group_by(station, glatos_array) %>% 
   dplyr::summarise(MeanLat=mean(deploy_lat), MeanLong=mean(deploy_long)) #get the mean location per station, in case there is >1 deployment
+
 
 # you could choose to plot stations which are within a certain bounding box!
 #to do this you would add another filter to the above data, before passing to the map
@@ -72,6 +69,56 @@ ggsave(plot = glatos_map, filename = "glatos_map.tiff", units="in", width=15, he
 #can specify location, file type and dimensions
 ~~~
 {: .language-r}
+
+
+### Bonus - plot all stations in the GLATOS network using the glatos.org receiver location file
+
+If we go and grab the latest deployments file from the glatos website, we can use it as the data source!
+If you have a login to the GLATOS data portal already, you can visit glatos.org -> click Data Portal, then login. 
+Then click Network Status on the lefthand bar, then download the Receiver Locations file.
+Put that file in your working directory (we often set it to the data/ subfolder for this workshop!)
+
+~~~
+## Bonus - 
+
+all_glatos_receivers <- read_csv("GLATOS_receiverLocations_20260217_204107.csv")
+
+# Same code as before, bounding box is all receivers
+
+all_base <- get_stadiamap(
+  bbox = c(left = min(all_glatos_receivers$deploy_long), 
+           bottom = min(all_glatos_receivers$deploy_lat), 
+           right = max(all_glatos_receivers$deploy_long), 
+           top = max(all_glatos_receivers$deploy_lat)),
+  maptype = "stamen_terrain_background", 
+  crop = FALSE,
+  zoom = 8)
+
+# updated the dates to be more recent
+all_glatos_deploy_plot <- all_glatos_receivers %>% 
+  mutate(deploy_date=ymd_hms(deploy_date_time)) %>% #make deploy datetime into a datetime
+  mutate(recover_date=ymd_hms(recover_date_time)) %>% #make recover datetime into a datetime
+  filter(!is.na(deploy_date)) %>% #no null deploys
+  filter(deploy_date > '2022-07-03' & recover_date < '2026-03-01') %>% #only looking at certain deployments, can add start/end dates here
+  group_by(station, glatos_array) %>% 
+  summarise(MeanLat=mean(deploy_lat), MeanLong=mean(deploy_long)) 
+
+# put it all together
+modern_glatos_map <- 
+  ggmap(all_base, extent='panel') + 
+  ylab("Latitude") +
+  xlab("Longitude") +
+  geom_point(data = all_glatos_deploy_plot, #filtering for recent deployments
+             aes(x = MeanLong,y = MeanLat, colour = glatos_array), #specify the data
+             shape = 19, size = 2) + theme(legend.position="none") #lots of aesthetic options here!
+
+modern_glatos_map
+
+~~~
+{: .language-r}
+
+
+
 
 ### Mapping our stations - Static map
 
