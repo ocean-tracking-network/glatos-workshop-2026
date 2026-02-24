@@ -70,7 +70,7 @@ install.packages('stars')
 install.packages('terra')
                                                             
 # Install packages for animating detection data
-remotes::install_github("jmlondon/pathroutr")
+install.packages("pathroutr", repos = "https://jmlondon.r-universe.dev")
 
 
 # Bonus content packages
