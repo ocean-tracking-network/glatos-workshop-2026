@@ -105,6 +105,8 @@ install.packages('terra')
 install.packages('plotly')
 install.packages('gganimate')
 install.packages('ggspatial')
+# Custom pathroutr package for routing around land masses
+install.packages("pathroutr", repos = "https://jmlondon.r-universe.dev")
 
 
 ```
