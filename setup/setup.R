@@ -71,7 +71,8 @@ install.packages('terra')
                                                             
 # Install packages for animating detection data
 install.packages("pathroutr", repos = "https://jmlondon.r-universe.dev")
-
+# by default, pathroutr doesn't install a dependency, sfnetworks
+install.packages("sfnetworks")
 
 # Bonus content packages
 install.packages('gganimate')
