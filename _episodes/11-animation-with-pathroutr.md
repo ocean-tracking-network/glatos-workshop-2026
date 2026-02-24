@@ -71,7 +71,7 @@ shape_file <- CAN[CAN$NAME_1 == 'Nova Scotia',]
 This shapefile is a great start, but we need the format to be an `sf` `multipolygon`. To do that we will run the `st_as_sf` function on our shapefile. We also want to change the coordinate reference system (CRS) of the file to a projected coordinate system since we will be mapping this plot flat. To do that we will run `st_transform` and provide it the value `5070`.
 
 ~~~
-ns_polygon <- st_as_sf(single_poly) %>% st_transform(5070)
+ns_polygon <- st_as_sf(shape_file) %>% st_transform(5070)
 ~~~
 {: .language-r}
 
