@@ -107,7 +107,8 @@ install.packages('gganimate')
 install.packages('ggspatial')
 # Custom pathroutr package for routing around land masses
 install.packages("pathroutr", repos = "https://jmlondon.r-universe.dev")
-
+# by default pathroutr doesn't install a needed dependency, sfnetworks.
+install.packages("sfnetworks")
 
 ```
 
