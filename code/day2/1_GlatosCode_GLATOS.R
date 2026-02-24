@@ -140,7 +140,7 @@ events_subset
 ## RI using the Kessel method ####
 rik_data <- residence_index(events_subset,
                             calculation_method = 'kessel')
-rik_data
+rik_data$residency_index
 
 ## RI time interval method, interval set to 6 hours ####
 # "Kessel" method is a special case of "time_interval" where time_interval_size = "1 day"
@@ -148,9 +148,16 @@ rik_data
 rit_data <- residence_index(events_subset,
                             calculation_method = 'time_interval',
                             time_interval_size = "6 hours")
-rit_data
+rit_data$residency_index
 
-# BREAK
+
+### Model receiver detection efficiency
+
+?detection_range_model
+
+### See the blogpost by author Ben Hlina
+# https://blog.benjaminhlina.com/posts/post-with-code/detection-efficiency/
+
 
 
 # 10 - Basic Visualization and Plotting ####
@@ -193,6 +200,15 @@ bubble_array
 erie_arrays <- c('DRF', 'DRL', 'DRU', 'MAU', 'RAR', 'SCL', 'SCM', 'TSR') #given
 nw <- c(43, -83.75) #given
 se <- c(41.25, -82) #given
+
+### Solution -----
+bubble_challenge <- detection_bubble_plot(detections_filtered,
+                                          background_ylim = c(nw[1], se[1]),
+                                          background_xlim = c(nw[2], se[2]),
+                                          symbol_radius = 0.75,
+                                          location_col = 'station',
+                                          col_grad = c('white', 'green'),
+                                          out_file = 'glatos_bubbles_challenge.png')
 
 
 
@@ -297,7 +313,7 @@ sum(inside_any)   # detections within 1 km of >= 1 receiver
 nrow(one_tag)     # total detections for this tag
 
 ### Visualize the buffer and data ####
-terra::plot(st_geometry(receiver_buf_1km), col = NA, border = "grey40", alpha=0.2,
+terra::plot(st_geometry(receiver_buf_1km), col = NA, border = "grey40",
      main = "Detections with 1 km detection range of receivers (UTM, one tag)")
 
 plot(st_transform(st_geometry(one_tag), 32620), pch = 16, cex = 0.6, add=TRUE)
@@ -363,7 +379,7 @@ mi = minmax[1]
 ma = minmax[2]
 
 # What is considered 'sea level' where we are going to be computing?
-water_line=0  # this will depend on your bathy dataset's units
+water_line=70  # this will depend on your bathy dataset's units
               # and the calculated breakpoint values more than 
               # the real-world values!
  
@@ -394,3 +410,100 @@ plot(st_geometry(one_tag), pch = 16, cex = 0.6, add = TRUE)
 
 
 ## Challenge - raster extraction
+
+
+# Animation using pathroutr ####
+
+library(glatos)
+library(sf)
+library(gganimate)
+library(tidyverse)
+library(pathroutr)
+# install.packages("pathroutr", repos = "https://jmlondon.r-universe.dev")
+library(ggspatial)
+library(sp)
+library(raster)
+library(geodata)
+
+detection_events <- #create detections event variable
+  read_otn_detections('nsbs_matched_detections_2022.zip') %>% # reading detections
+  false_detections(tf = 3600) %>%  #find false detections
+  dplyr::filter(passed_filter != FALSE) %>% 
+  detection_events(location_col = 'station', time_sep=3600)
+
+plot_data <- detection_events %>% 
+  dplyr::select(animal_id, mean_longitude,mean_latitude, first_detection)
+
+
+# Select a single individual from the blue shark dataset
+one_fish <- plot_data[plot_data$animal_id == "NSBS-1393342-2021-08-10",] 
+
+
+# change the path of the individual so that it intersects land
+one_fish_shifted <- one_fish %>% mutate(mean_longitude_shifted = mean_longitude-0.5)
+
+
+# Import the land polygons for Canada
+
+CAN<-geodata::gadm('CANADA', level=1, path=".")
+
+# and just select Nova Scotia
+
+single_poly <- CAN[CAN$NAME_1 == 'Nova Scotia',]
+
+# Transform it to Conus Albers (epsg:5070)
+# The Albers map projection is an equal area conic 
+# projection best suited for land masses extending in an 
+# east-to-west orientation at mid-latitudes.
+
+ns_polygon <- st_as_sf(single_poly) %>% st_transform(5070)
+
+# Turn the fish detection set into a Path object
+
+path <- one_fish_shifted %>%  dplyr::select(mean_longitude_shifted,mean_latitude)
+
+path <- SpatialPoints(path, proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs"))
+
+path <-  st_as_sf(path)  %>% st_transform(5070)
+
+# Visual inspection of the new object
+
+ggplot() + 
+  ggspatial::annotation_spatial(ns_polygon, fill = "cornsilk3", size = 0) +
+  geom_point(data = path, aes(x=unlist(map(geometry,1)), y=unlist(map(geometry,2)))) +
+  geom_path(data = path, aes(x=unlist(map(geometry,1)), y=unlist(map(geometry,2))))  +
+  theme_void()
+
+plot_path <- path %>% summarise(do_union = FALSE) %>% st_cast('LINESTRING')
+
+track_pts <- st_sample(plot_path, size = 10000, type = "regular")
+
+vis_graph <- prt_visgraph(ns_polygon, buffer = 100)
+
+track_pts_fix <- prt_reroute(track_pts, ns_polygon, vis_graph, blend = TRUE)
+
+track_pts_fix <- prt_update_points(track_pts_fix, track_pts)
+
+pathroutrplot <- ggplot() + 
+  ggspatial::annotation_spatial(ns_polygon, fill = "cornsilk3", size = 0) +
+  geom_point(data = track_pts_fix, aes(x=unlist(map(geometry,1)), y=unlist(map(geometry,2)))) +
+  geom_path(data = track_pts_fix, aes(x=unlist(map(geometry,1)), y=unlist(map(geometry,2))))  +
+  theme_void()
+
+pathroutrplot
+
+pathroutrplot.animation <-
+  pathroutrplot +
+  transition_reveal(fid) +
+  shadow_mark(past = TRUE, future = FALSE)
+
+gganimate::animate(pathroutrplot.animation, nframes=100, detail=2)
+
+# Making more detail, adding frames to reduce tweening, or increasing 
+# the resolution of the GADM raster will improve our animation's accuracy
+# but it will create more computing expense!
+
+# for more on using pathroutr to dodge land masses, especially in a
+# complicated and closed system, check out Ben Hlina's blog post on
+# the method: 
+# https://blog.benjaminhlina.com/posts/post-with-code/shortest-path-pathroutr/shortest_path_example_pathroutr.html
